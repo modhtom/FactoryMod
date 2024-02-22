@@ -1,4 +1,4 @@
-name: ${name}
+name: FactoryMod
 main: com.github.igotyou.FactoryMod.FactoryMod
 author: Maxopoly, igotyou
 version: ${version}
