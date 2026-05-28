@@ -147,13 +147,33 @@ public abstract class InputRecipe implements IRecipe {
      * whole in an item gui
      */
     public ItemStack getRecipeRepresentation() {
+        return getRecipeRepresentation(null);
+    }
+
+    public ItemStack getRecipeRepresentation(Inventory inputInv) {
         ItemStack res = getRecipeRepresentationType();
         ItemMeta im = res.getItemMeta();
         im.setDisplayName(ChatColor.DARK_GREEN + getName());
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GOLD + "Input:");
-        for (String s : getTextualInputRepresentation(null, null)) {
-            lore.add(ChatColor.GRAY + " - " + ChatColor.AQUA + s);
+        List<String> textualInputs = getTextualInputRepresentation(null, null);
+        List<Entry<ItemStack, Integer>> baseItems = new ArrayList<>();
+        for (Entry<ItemStack, Integer> entry : input.getAllItems().entrySet()) {
+            if (entry.getValue() > 0) {
+                baseItems.add(entry);
+            }
+        }
+        ItemMap inventoryMap = inputInv != null ? new ItemMap(inputInv) : null;
+        for (int i = 0; i < textualInputs.size(); i++) {
+            if (i < baseItems.size() && inputInv != null) {
+                Entry<ItemStack, Integer> entry = baseItems.get(i);
+                String name = formatIngredientName(entry.getKey());
+                int have = inventoryMap.getAmount(entry.getKey());
+                ChatColor color = have >= entry.getValue() ? ChatColor.GREEN : ChatColor.RED;
+                lore.add(ChatColor.GRAY + " - " + color + have + "/" + entry.getValue() + " " + name);
+            } else {
+                lore.add(ChatColor.GRAY + " - " + ChatColor.AQUA + textualInputs.get(i));
+            }
         }
         lore.add("");
         lore.add(ChatColor.GOLD + "Output:");
@@ -216,33 +236,37 @@ public abstract class InputRecipe implements IRecipe {
         return identifier.hashCode();
     }
 
+    protected String formatIngredientName(ItemStack item) {
+        if (item == null || item.isEmpty()) {
+            return "Unknown";
+        }
+        String customItemKey = CustomItem.getCustomItemKey(item);
+        if (customItemKey != null) {
+            ItemStack customItem = CustomItem.getCustomItem(customItemKey);
+            if (customItem != null && customItem.hasItemMeta() && customItem.getItemMeta().hasDisplayName()) {
+                return StringUtils.abbreviate(customItem.getItemMeta().getDisplayName(), 35);
+            }
+            if (customItem != null && customItem.hasItemMeta() && customItem.getItemMeta().hasItemName()) {
+                return StringUtils.abbreviate(customItem.getItemMeta().getItemName(), 35);
+            }
+            return customItemKey;
+        }
+        if (!item.hasItemMeta()) {
+            return ItemUtils.getItemName(item);
+        }
+        ItemMeta meta = item.getItemMeta();
+        String name = ChatColor.ITALIC + ItemUtils.getItemName(item);
+        if (meta.hasDisplayName()) {
+            name += String.format("%s [%s%1$s]", ChatColor.DARK_AQUA, StringUtils.abbreviate(meta.getDisplayName(), 20));
+        }
+        return name;
+    }
+
     protected List<String> formatLore(ItemMap ingredients) {
         List<String> result = new ArrayList<>();
         for (Entry<ItemStack, Integer> entry : ingredients.getAllItems().entrySet()) {
             if (entry.getValue() > 0) {
-                ItemStack item = entry.getKey();
-                String customItemKey = CustomItem.getCustomItemKey(item);
-                if (customItemKey != null) {
-                    ItemStack customItem = CustomItem.getCustomItem(customItemKey);
-                    if (customItem != null && customItem.hasItemMeta() && customItem.getItemMeta().hasDisplayName()) {
-                        result.add(String.format("%s %s", entry.getValue(),
-                            StringUtils.abbreviate(customItem.getItemMeta().getDisplayName(), 35)));
-                    } else if (customItem != null && customItem.hasItemMeta() && customItem.getItemMeta().hasItemName()) {
-                        result.add(String.format("%s %s", entry.getValue(),
-                            StringUtils.abbreviate(customItem.getItemMeta().getItemName(), 35)));
-                    } else {
-                        result.add(String.format("%s %s", entry.getValue(), customItemKey));
-                    }
-                } else if (!item.hasItemMeta()) {
-                    result.add(entry.getValue() + " " + ItemUtils.getItemName(item));
-                } else {
-                    String lore = String.format("%s %s%s", entry.getValue(), ChatColor.ITALIC, ItemUtils.getItemName(item));
-                    if (item.getItemMeta().hasDisplayName()) {
-                        lore += String.format("%s [%s%1$s]", ChatColor.DARK_AQUA,
-                            StringUtils.abbreviate(item.getItemMeta().getDisplayName(), 20));
-                    }
-                    result.add(lore);
-                }
+                result.add(entry.getValue() + " " + formatIngredientName(entry.getKey()));
             }
         }
         return result;
