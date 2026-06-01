@@ -1,0 +1,204 @@
+factory_interaction_material: STICK
+default_update_time: 1s
+default_fuel:
+  charcoal:
+    material: CHARCOAL
+default_fuel_consumption_intervall: 12s
+default_health: 10000
+default_menu_factory: Basic Workshop
+log_inventories: true
+disable_nether: false
+default_break_grace_period: 14d
+decay_intervall: 1h
+default_decay_amount: 10
+use_recipe_yamlidentifiers: true
+saving_intervall: 15m
+max_input_chests: 10
+max_output_chests: 10
+max_fuel_chests: 10
+max_iof_chests: 15
+
+factories:
+  basic_workshop:
+    type: FCC
+    name: Basic Workshop
+    updatetime: 1s
+    health: 20000
+    grace_period: 14d
+    decay_amount: 10
+    citadelBreakReduction: 1.0
+    setupcost:
+      cobblestone:
+        material: COBBLESTONE
+        amount: 64
+      iron:
+        material: IRON_INGOT
+        amount: 8
+      redstone:
+        material: REDSTONE
+        amount: 8
+    recipes:
+      - smelt_raw_iron
+      - smelt_raw_gold
+      - smelt_raw_copper
+      - smelt_cobblestone
+      - smelt_stone
+      - smelt_sand
+      - smelt_clay
+      - smelt_netherrack
+      - smelt_cobbled_deepslate
+      - compact_stack
+      - decompact_stack
+
+recipes:
+  smelt_raw_iron:
+    type: PRODUCTION
+    name: Smelt Raw Iron
+    production_time: 4s
+    input:
+      raw_iron:
+        material: RAW_IRON
+        amount: 16
+    output:
+      iron_ingot:
+        material: IRON_INGOT
+        amount: 16
+  smelt_raw_gold:
+    type: PRODUCTION
+    name: Smelt Raw Gold
+    production_time: 4s
+    input:
+      raw_gold:
+        material: RAW_GOLD
+        amount: 16
+    output:
+      gold_ingot:
+        material: GOLD_INGOT
+        amount: 16
+  smelt_raw_copper:
+    type: PRODUCTION
+    name: Smelt Raw Copper
+    production_time: 4s
+    input:
+      raw_copper:
+        material: RAW_COPPER
+        amount: 16
+    output:
+      copper_ingot:
+        material: COPPER_INGOT
+        amount: 16
+  smelt_cobblestone:
+    type: PRODUCTION
+    name: Smelt Cobblestone
+    production_time: 6s
+    input:
+      cobblestone:
+        material: COBBLESTONE
+        amount: 64
+    output:
+      stone:
+        material: STONE
+        amount: 64
+  smelt_stone:
+    type: PRODUCTION
+    name: Smelt Stone
+    production_time: 6s
+    input:
+      stone:
+        material: STONE
+        amount: 64
+    output:
+      smooth_stone:
+        material: SMOOTH_STONE
+        amount: 64
+  smelt_sand:
+    type: PRODUCTION
+    name: Smelt Sand
+    production_time: 6s
+    input:
+      sand:
+        material: SAND
+        amount: 64
+    output:
+      glass:
+        material: GLASS
+        amount: 64
+  smelt_clay:
+    type: PRODUCTION
+    name: Smelt Clay
+    production_time: 6s
+    input:
+      clay:
+        material: CLAY
+        amount: 64
+    output:
+      terracotta:
+        material: TERRACOTTA
+        amount: 64
+  smelt_netherrack:
+    type: PRODUCTION
+    name: Smelt Netherrack
+    production_time: 6s
+    input:
+      netherrack:
+        material: NETHERRACK
+        amount: 64
+    output:
+      nether_brick:
+        material: NETHER_BRICK
+        amount: 64
+  smelt_cobbled_deepslate:
+    type: PRODUCTION
+    name: Smelt Cobbled Deepslate
+    production_time: 6s
+    input:
+      cobbled_deepslate:
+        material: COBBLED_DEEPSLATE
+        amount: 64
+    output:
+      deepslate:
+        material: DEEPSLATE
+        amount: 64
+  compact_stack:
+    type: COMPACT
+    name: Compact Stack
+    production_time: 2s
+    compact_lore: Compacted
+    excluded_materials:
+      - SHULKER_BOX
+      - WHITE_SHULKER_BOX
+      - ORANGE_SHULKER_BOX
+      - MAGENTA_SHULKER_BOX
+      - LIGHT_BLUE_SHULKER_BOX
+      - YELLOW_SHULKER_BOX
+      - LIME_SHULKER_BOX
+      - PINK_SHULKER_BOX
+      - GRAY_SHULKER_BOX
+      - LIGHT_GRAY_SHULKER_BOX
+      - CYAN_SHULKER_BOX
+      - PURPLE_SHULKER_BOX
+      - BLUE_SHULKER_BOX
+      - BROWN_SHULKER_BOX
+      - GREEN_SHULKER_BOX
+      - RED_SHULKER_BOX
+      - BLACK_SHULKER_BOX
+      - BUNDLE
+  decompact_stack:
+    type: DECOMPACT
+    name: Decompact Stack
+    production_time: 2s
+    compact_lore: Compacted
+
+renames:
+
+CivMenu:
+  events:
+    FactoryCreation:
+    WrongFactoryCreationItems:
+    WrongFactoryBlockSetup:
+    PipeCreation:
+    WrongPipeCreationItems:
+    WrongPipeBlockSetup:
+    SorterCreation:
+    WrongSorterCreationItems:
+    WrongSorterBlockSetup:

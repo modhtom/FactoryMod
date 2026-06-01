@@ -30,7 +30,6 @@ import java.util.function.Function;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -108,7 +107,7 @@ public class FurnCraftChestFactory extends Factory implements IIOFInventoryProvi
      */
     public Inventory getInventory() {
         // do not need to check for barrels because they are not included in the getChest() function, which is used for double chest detection/force loading
-        if (getChest().getType() != Material.CHEST && getChest().getType() != Material.TRAPPED_CHEST && !Tag.COPPER_CHESTS.isTagged(getChest().getType())) {
+        if (getChest().getType() != Material.CHEST && getChest().getType() != Material.TRAPPED_CHEST) {
             return null;
         }
         Chest chestBlock = (Chest) (getChest().getState());
@@ -144,7 +143,7 @@ public class FurnCraftChestFactory extends Factory implements IIOFInventoryProvi
         BlockFace facing = getFacing();
         for (BlockFace relativeFace : ioTypeFunc.apply(getFurnaceIOSelector()).apply(facing)) {
             Block relBlock = fblock.getRelative(relativeFace);
-            if (relBlock.getType() == Material.CHEST || relBlock.getType() == Material.TRAPPED_CHEST || Tag.COPPER_CHESTS.isTagged(relBlock.getType())) {
+            if (relBlock.getType() == Material.CHEST || relBlock.getType() == Material.TRAPPED_CHEST) {
                 combinedInvList.add(((Chest) relBlock.getState()).getInventory());
             }
             if (relBlock.getType() == Material.BARREL) {
@@ -154,7 +153,7 @@ public class FurnCraftChestFactory extends Factory implements IIOFInventoryProvi
         Block tblock = fccs.getCraftingTable();
         for (BlockFace relativeFace : ioTypeFunc.apply(getTableIOSelector()).apply(facing)) {
             Block relBlock = tblock.getRelative(relativeFace);
-            if (relBlock.getType() == Material.CHEST || relBlock.getType() == Material.TRAPPED_CHEST || Tag.COPPER_CHESTS.isTagged(relBlock.getType())) {
+            if (relBlock.getType() == Material.CHEST || relBlock.getType() == Material.TRAPPED_CHEST) {
                 combinedInvList.add(((Chest) relBlock.getState()).getInventory());
             }
             if (relBlock.getType() == Material.BARREL) {

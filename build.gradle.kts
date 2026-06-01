@@ -6,7 +6,7 @@ version = "3.1.0"
 
 dependencies {
     paperweight {
-        paperDevBundle(libs.versions.paper)
+        paperDevBundle("1.21.8-R0.1-SNAPSHOT")
     }
 
     compileOnly(project(":plugins:civmodcore-paper"))

@@ -7,7 +7,6 @@ import org.bukkit.block.Furnace;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import vg.civcraft.mc.civmodcore.inventory.items.ItemMap;
 
 /**
  * Power manager for a FurnCraftChest factory, which uses a specific item in the
@@ -46,11 +45,13 @@ public class FurnacePowerManager implements IPowerManager {
     }
 
     public boolean powerAvailable(int fuelCount) {
+        if (fuelCount == 0) {
+            return true;
+        }
         if (iofProvider != null) {
             Inventory fuelInv = iofProvider.getFuelInventory();
             if (fuelInv != null) {
-                ItemMap im = new ItemMap(fuelInv);
-                return im.getAmount(fuel) >= fuelCount;
+                return countFuel(fuelInv) >= fuelCount;
             }
         }
 
@@ -58,14 +59,8 @@ public class FurnacePowerManager implements IPowerManager {
             return false;
         }
 
-        if (fuelCount == 0)
-            fuelCount = 1;
-
         FurnaceInventory fi = ((Furnace) furnace.getState()).getInventory();
-        ItemMap im = new ItemMap();
-        im.addItemStack(fi.getFuel());
-        im.addItemStack(fi.getSmelting());
-        return im.getAmount(fuel) >= fuelCount;
+        return countFuel(fi) >= fuelCount;
     }
 
     public int getPowerConsumptionIntervall() {
@@ -84,32 +79,67 @@ public class FurnacePowerManager implements IPowerManager {
         if (iofProvider != null) {
             Inventory fuelInv = iofProvider.getFuelInventory();
             if (fuelInv != null) {
-                for (int i = 0; i < fuelCount; i++) {
-                    fuelInv.removeItem(fuel);
-                }
+                removeFuel(fuelInv, fuelCount);
                 return;
             }
         }
 
         FurnaceInventory fi = ((Furnace) furnace.getState()).getInventory();
-
-        for (int i = 0; i < fuelCount; i++)
-            fi.removeItem(fuel);
+        removeFuel(fi, fuelCount);
     }
 
     public int getFuelAmountAvailable() {
         if (iofProvider != null) {
             Inventory fuelInv = iofProvider.getFuelInventory();
             if (fuelInv != null) {
-                ItemMap im = new ItemMap(fuelInv);
-                return im.getAmount(fuel);
+                return countFuel(fuelInv);
             }
         }
-        return new ItemMap(((Furnace) furnace.getState()).getInventory()).getAmount(fuel);
+        return countFuel(((Furnace) furnace.getState()).getInventory());
     }
 
     public ItemStack getFuel() {
         return fuel;
+    }
+
+    private int countFuel(Inventory inventory) {
+        int amount = 0;
+        for (ItemStack item : inventory.getContents()) {
+            if (isFuel(item)) {
+                amount += item.getAmount();
+            }
+        }
+        return amount;
+    }
+
+    private void removeFuel(Inventory inventory, int amount) {
+        int remaining = amount;
+        for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
+            ItemStack item = inventory.getItem(slot);
+            if (!isFuel(item)) {
+                continue;
+            }
+            int removed = Math.min(item.getAmount(), remaining);
+            item.setAmount(item.getAmount() - removed);
+            remaining -= removed;
+            if (item.getAmount() <= 0) {
+                inventory.setItem(slot, null);
+            } else {
+                inventory.setItem(slot, item);
+            }
+        }
+    }
+
+    private boolean isFuel(ItemStack item) {
+        if (item == null || fuel == null) {
+            return false;
+        }
+        Material itemType = item.getType();
+        Material fuelType = fuel.getType();
+        if (fuelType == Material.COAL || fuelType == Material.CHARCOAL) {
+            return itemType == Material.COAL || itemType == Material.CHARCOAL;
+        }
+        return itemType == fuelType;
     }
 
 }

@@ -46,12 +46,16 @@ import com.github.igotyou.FactoryMod.utility.FactoryModGUI;
 import org.apache.commons.lang3.text.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import vg.civcraft.mc.civmodcore.config.ConfigHelper;
 import vg.civcraft.mc.civmodcore.inventory.CustomItem;
@@ -66,6 +70,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -129,7 +134,7 @@ public class ConfigParser {
         }
         defaultUpdateTime = parseTimeAsTicks(config.getString("default_update_time", "250ms"));
         defaultHealth = config.getInt("default_health", 10000);
-        ItemMap dFuel = ConfigHelper.parseItemMap(config.getConfigurationSection("default_fuel"));
+        ItemMap dFuel = parseItemMap(config.getConfigurationSection("default_fuel"));
         if (dFuel.getTotalUniqueItemAmount() > 0) {
             defaultFuel = dFuel.getItemStackRepresentation().get(0);
         } else {
@@ -195,6 +200,10 @@ public class ConfigParser {
     private void parseRecipes(ConfigurationSection config) {
         recipes = new HashMap<>();
         forceRecipes = new HashSet<>();
+        if (config == null) {
+            plugin.getLogger().info("No recipe configurations found in config");
+            return;
+        }
         List<String> recipeKeys = new LinkedList<>();
         for (String key : config.getKeys(false)) {
             ConfigurationSection current = config.getConfigurationSection(key);
@@ -288,7 +297,13 @@ public class ConfigParser {
             return;
         }
         for (String key : config.getKeys(false)) {
-            parseFactory(config.getConfigurationSection(key));
+            ConfigurationSection current = config.getConfigurationSection(key);
+            if (current == null) {
+                plugin.warning("Found invalid factory section that should not exist at "
+                    + config.getCurrentPath() + "." + key);
+                continue;
+            }
+            parseFactory(current);
         }
 
     }
@@ -325,7 +340,7 @@ public class ConfigParser {
                 if (egg == null) {
                     break;
                 }
-                ItemMap pipeSetupCost = ConfigHelper.parseItemMap(config.getConfigurationSection("setupcost"));
+                ItemMap pipeSetupCost = parseItemMap(config.getConfigurationSection("setupcost"));
                 if (pipeSetupCost.getTotalUniqueItemAmount() > 0) {
                     manager.addFactoryEgg(PipeStructure.class, pipeSetupCost, egg);
                 } else {
@@ -337,7 +352,7 @@ public class ConfigParser {
                 if (egg == null) {
                     break;
                 }
-                ItemMap sorterSetupCost = ConfigHelper.parseItemMap(config.getConfigurationSection("setupcost"));
+                ItemMap sorterSetupCost = parseItemMap(config.getConfigurationSection("setupcost"));
                 if (sorterSetupCost.getTotalUniqueItemAmount() > 0) {
                     manager.addFactoryEgg(BlockFurnaceStructure.class, sorterSetupCost, egg);
                 } else {
@@ -371,7 +386,7 @@ public class ConfigParser {
         }
         ItemStack fuel;
         if (config.contains("fuel")) {
-            ItemMap tfuel = ConfigHelper.parseItemMap(config.getConfigurationSection("fuel"));
+            ItemMap tfuel = parseItemMap(config.getConfigurationSection("fuel"));
             if (tfuel.getTotalUniqueItemAmount() > 0) {
                 fuel = tfuel.getItemStackRepresentation().get(0);
             } else {
@@ -409,7 +424,7 @@ public class ConfigParser {
         }
         ItemStack fuel;
         if (config.contains("fuel")) {
-            ItemMap tfuel = ConfigHelper.parseItemMap(config.getConfigurationSection("fuel"));
+            ItemMap tfuel = parseItemMap(config.getConfigurationSection("fuel"));
             if (tfuel.getTotalUniqueItemAmount() > 0) {
                 fuel = tfuel.getItemStackRepresentation().get(0);
             } else {
@@ -449,7 +464,7 @@ public class ConfigParser {
         }
         ItemStack fuel;
         if (config.contains("fuel")) {
-            ItemMap tfuel = ConfigHelper.parseItemMap(config.getConfigurationSection("fuel"));
+            ItemMap tfuel = parseItemMap(config.getConfigurationSection("fuel"));
             if (tfuel.getTotalUniqueItemAmount() > 0) {
                 fuel = tfuel.getItemStackRepresentation().get(0);
             } else {
@@ -467,7 +482,7 @@ public class ConfigParser {
         }
         int fuelIntervall;
         if (config.contains("fuel_consumption_intervall")) {
-            fuelIntervall = parseTimeAsTicks(config.getString("fuel_consumption_intervall")) / 50;
+            fuelIntervall = parseTimeAsTicks(config.getString("fuel_consumption_intervall"));
         } else {
             fuelIntervall = defaultFuelConsumptionTime;
         }
@@ -487,7 +502,7 @@ public class ConfigParser {
         double citadelBreakReduction = config.getDouble("citadelBreakReduction", 1.0);
         ItemMap setupCost = null;
         if (config.isConfigurationSection("setupcost")) {
-            setupCost = ConfigHelper.parseItemMap(config.getConfigurationSection("setupcost"));
+            setupCost = parseItemMap(config.getConfigurationSection("setupcost"));
         }
         FurnCraftChestEgg egg = new FurnCraftChestEgg(name, update, null, fuel, fuelIntervall, returnRate, health,
             gracePeriod, healthPerDamageIntervall, citadelBreakReduction, setupCost);
@@ -559,7 +574,7 @@ public class ConfigParser {
                 input = ((InputRecipe) parentRecipe).getInput();
             }
         } else {
-            input = ConfigHelper.parseItemMap(inputSection);
+            input = parseItemMap(inputSection);
         }
         switch (type) {
             case "PRODUCTION":
@@ -575,7 +590,7 @@ public class ConfigParser {
                         recipeRepresentation = ((ProductionRecipe) parentRecipe).getRecipeRepresentation();
                     }
                 } else {
-                    output = ConfigHelper.parseItemMap(outputSection);
+                    output = parseItemMap(outputSection);
                     recipeRepresentation = parseFirstItem(outputSection);
                 }
                 ProductionRecipeModifier modi = parseProductionRecipeModifier(config.getConfigurationSection("modi"));
@@ -706,7 +721,7 @@ public class ConfigParser {
                 // This is untested and should not be used for now
                 plugin.warning(
                     "This recipe is not tested or even completly developed, use it with great care and don't expect it to work");
-                ItemMap tessence = ConfigHelper.parseItemMap(config.getConfigurationSection("essence"));
+                ItemMap tessence = parseItemMap(config.getConfigurationSection("essence"));
                 if (tessence.getTotalUniqueItemAmount() > 0) {
                     ItemStack essence = tessence.getItemStackRepresentation().get(0);
                     int repPerEssence = config.getInt("repair_per_essence");
@@ -727,7 +742,7 @@ public class ConfigParser {
                         outputMap = ((PylonRecipe) parentRecipe).getOutput().clone();
                     }
                 } else {
-                    outputMap = ConfigHelper.parseItemMap(outputSec);
+                    outputMap = parseItemMap(outputSec);
                 }
                 if (outputMap.getTotalItemAmount() == 0) {
                     plugin.warning("Pylon recipe " + name + " has an empty output specified");
@@ -762,7 +777,7 @@ public class ConfigParser {
                         tool = ((DeterministicEnchantingRecipe) parentRecipe).getTool().clone();
                     }
                 } else {
-                    tool = ConfigHelper.parseItemMap(toolSection);
+                    tool = parseItemMap(toolSection);
                 }
                 if (tool.getTotalItemAmount() == 0) {
                     plugin.warning("Deterministic enchanting recipe " + name
@@ -796,7 +811,7 @@ public class ConfigParser {
                         if (keySec != null) {
                             double chance = keySec.getDouble("chance");
                             totalChance += chance;
-                            ItemMap im = ConfigHelper.parseItemMap(keySec);
+                            ItemMap im = parseItemMap(keySec);
                             outputs.put(im, chance);
                             if (key.equals(displayMap)) {
                                 displayThis = im;
@@ -828,7 +843,7 @@ public class ConfigParser {
                         toolMap = ((LoreEnchantRecipe) parentRecipe).getTool().clone();
                     }
                 } else {
-                    toolMap = ConfigHelper.parseItemMap(toolSec);
+                    toolMap = parseItemMap(toolSec);
                 }
                 if (toolMap.getTotalItemAmount() == 0) {
                     plugin.warning("Lore enchanting recipe " + name + " had no tool to enchant specified, it was skipped");
@@ -882,7 +897,7 @@ public class ConfigParser {
                         printingPlateOutput = ((PrintingPlateRecipe) parentRecipe).getOutput();
                     }
                 } else {
-                    printingPlateOutput = ConfigHelper.parseItemMap(printingPlateOutputSection);
+                    printingPlateOutput = parseItemMap(printingPlateOutputSection);
                 }
                 result = new PrintingPlateRecipe(identifier, name, productionTime, input, printingPlateOutput);
                 break;
@@ -896,18 +911,18 @@ public class ConfigParser {
                         printingPlateJsonOutput = ((PrintingPlateJsonRecipe) parentRecipe).getOutput();
                     }
                 } else {
-                    printingPlateJsonOutput = ConfigHelper.parseItemMap(printingPlateJsonOutputSection);
+                    printingPlateJsonOutput = parseItemMap(printingPlateJsonOutputSection);
                 }
                 result = new PrintingPlateJsonRecipe(identifier, name, productionTime, input, printingPlateJsonOutput);
                 break;
             case "PRINTBOOK":
-                ItemMap printBookPlate = ConfigHelper.parseItemMap(config.getConfigurationSection("printingplate"));
+                ItemMap printBookPlate = parseItemMap(config.getConfigurationSection("printingplate"));
                 int printBookOutputAmount = config.getInt("outputamount", 1);
                 result = new PrintBookRecipe(identifier, name, productionTime, input, printBookPlate,
                     printBookOutputAmount);
                 break;
             case "PRINTNOTE":
-                ItemMap printNotePlate = ConfigHelper.parseItemMap(config.getConfigurationSection("printingplate"));
+                ItemMap printNotePlate = parseItemMap(config.getConfigurationSection("printingplate"));
                 int printBookNoteAmount = config.getInt("outputamount", 1);
                 boolean secureNote = config.getBoolean("securenote", false);
                 String noteTitle = config.getString("title");
@@ -1046,7 +1061,7 @@ public class ConfigParser {
         return result;
     }
 
-    private static ItemStack parseFirstItem(ConfigurationSection config) {
+    private ItemStack parseFirstItem(ConfigurationSection config) {
         if (config == null) {
             return null;
         }
@@ -1063,7 +1078,174 @@ public class ConfigParser {
                 return item;
             }
         } else {
-            return config.getItemStack(key);
+            ItemStack item = config.getItemStack(key);
+            if (item != null && !item.getType().isAir()) {
+                return item;
+            }
+            return section == null ? null : parseLegacyItemStack(section);
+        }
+    }
+
+    private ItemMap parseItemMap(ConfigurationSection config) {
+        ItemMap parsed = ConfigHelper.parseItemMap(config);
+        if (config == null) {
+            return parsed;
+        }
+        parsed.merge(parseLegacyItemMap(config));
+        return parsed;
+    }
+
+    private ItemMap parseLegacyItemMap(ConfigurationSection config) {
+        ItemMap result = new ItemMap();
+        for (String key : config.getKeys(false)) {
+            ConfigurationSection section = config.getConfigurationSection(key);
+            if (section == null || !section.contains("material")) {
+                continue;
+            }
+            ItemStack item = parseLegacyItemStack(section);
+            if (item != null) {
+                result.addItemStack(item);
+            }
+        }
+        return result;
+    }
+
+    private ItemStack parseLegacyItemStack(ConfigurationSection config) {
+        int amount = config.getInt("amount", 1);
+        if (amount <= 0) {
+            return null;
+        }
+        Material material = parseLegacyMaterial(config);
+        if (material == null) {
+            plugin.warning("Could not parse material " + config.getString("material") + " at "
+                + config.getCurrentPath());
+            return null;
+        }
+        ItemStack item = new ItemStack(material, amount);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            applyLegacyItemMeta(config, meta);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private Material parseLegacyMaterial(ConfigurationSection config) {
+        String materialName = config.getString("material");
+        if (materialName == null) {
+            return null;
+        }
+        String normalized = materialName.toUpperCase(Locale.ROOT);
+        if (normalized.contains(":")) {
+            normalized = normalized.substring(normalized.indexOf(':') + 1);
+        }
+        if ("COAL".equals(normalized) && config.getInt("durability", 0) == 1) {
+            return Material.CHARCOAL;
+        }
+        return Material.getMaterial(normalized);
+    }
+
+    private void applyLegacyItemMeta(ConfigurationSection config, ItemMeta meta) {
+        String displayName = config.getString("name", config.getString("displayName"));
+        ConfigurationSection nbtSection = config.getConfigurationSection("nbt");
+        if (displayName == null && nbtSection != null) {
+            displayName = nbtSection.getString("displayName");
+        }
+        if (displayName != null) {
+            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
+        }
+        List<String> lore = config.getStringList("lore");
+        if (!lore.isEmpty()) {
+            List<String> coloredLore = new ArrayList<>(lore.size());
+            for (String line : lore) {
+                coloredLore.add(ChatColor.translateAlternateColorCodes('&', line));
+            }
+            meta.setLore(coloredLore);
+        }
+        applyLegacyEnchants(config, meta);
+        applyLegacyDurability(config, meta);
+        applyLegacyColor(config, meta);
+    }
+
+    private void applyLegacyEnchants(ConfigurationSection config, ItemMeta meta) {
+        ConfigurationSection enchants = config.getConfigurationSection("enchants");
+        if (enchants == null) {
+            return;
+        }
+        for (String key : enchants.getKeys(false)) {
+            ConfigurationSection enchantSection = enchants.getConfigurationSection(key);
+            if (enchantSection == null) {
+                continue;
+            }
+            String enchantName = enchantSection.getString("enchant", key);
+            Enchantment enchantment = parseEnchantment(enchantName);
+            if (enchantment == null) {
+                plugin.warning("Could not parse enchantment " + enchantName + " at "
+                    + enchantSection.getCurrentPath());
+                continue;
+            }
+            meta.addEnchant(enchantment, enchantSection.getInt("level", 1), true);
+        }
+    }
+
+    private Enchantment parseEnchantment(String enchantName) {
+        if (enchantName == null) {
+            return null;
+        }
+        String normalized = enchantName.toLowerCase(Locale.ROOT);
+        NamespacedKey key = normalized.contains(":")
+            ? NamespacedKey.fromString(normalized)
+            : NamespacedKey.minecraft(normalized);
+        Enchantment enchantment = key == null ? null : Enchantment.getByKey(key);
+        if (enchantment == null) {
+            enchantment = Enchantment.getByName(enchantName.toUpperCase(Locale.ROOT));
+        }
+        return enchantment;
+    }
+
+    private void applyLegacyDurability(ConfigurationSection config, ItemMeta meta) {
+        if (!(meta instanceof Damageable) || !config.contains("durability")) {
+            return;
+        }
+        int durability = config.getInt("durability");
+        if (durability >= 0) {
+            ((Damageable) meta).setDamage(durability);
+        }
+    }
+
+    private void applyLegacyColor(ConfigurationSection config, ItemMeta meta) {
+        if (!(meta instanceof LeatherArmorMeta)) {
+            return;
+        }
+        Color color = parseLegacyColor(config);
+        if (color != null) {
+            ((LeatherArmorMeta) meta).setColor(color);
+        }
+    }
+
+    private Color parseLegacyColor(ConfigurationSection config) {
+        if (config.isConfigurationSection("color")) {
+            ConfigurationSection colorSection = config.getConfigurationSection("color");
+            int red = colorSection.getInt("red", -1);
+            int green = colorSection.getInt("green", -1);
+            int blue = colorSection.getInt("blue", -1);
+            if (red < 0 || green < 0 || blue < 0) {
+                return null;
+            }
+            try {
+                return Color.fromRGB(red, green, blue);
+            } catch (IllegalArgumentException ignored) {
+                return null;
+            }
+        }
+        String color = config.getString("color");
+        if (color == null) {
+            return null;
+        }
+        try {
+            return Color.fromRGB(Integer.parseInt(color.replace("#", ""), 16));
+        } catch (IllegalArgumentException ignored) {
+            return null;
         }
     }
 

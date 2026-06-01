@@ -298,9 +298,7 @@ public class FurnCraftChestInteractionManager implements IInteractionManager {
                     } else {
                         fccf.setRecipe(recipe);
                         p.sendMessage(ChatColor.GREEN + "Switched recipe to " + recipe.getName());
-                        ComponableInventory compInv = buildRecipeInventory(p);
-                        compInv.update();
-                        compInv.updatePlayerView();
+                        refreshRecipeInventory(p);
                     }
                 }
             };
@@ -351,6 +349,7 @@ public class FurnCraftChestInteractionManager implements IInteractionManager {
                 } else {
                     fccf.setRecipeForce(FactoryMod.getInstance().getManager().getRecipe(CharcoalConsumptionUpgradeRecipe.IDENTIFIER));
                     p.sendMessage(ChatColor.GREEN + "Switched recipe to " + fccf.getCurrentRecipe().getName());
+                    refreshRecipeInventory(p);
                 }
             }
         };
@@ -394,9 +393,16 @@ public class FurnCraftChestInteractionManager implements IInteractionManager {
                 } else {
                     fccf.setRecipeForce(FactoryMod.getInstance().getManager().getRecipe(SpeedUpgradeRecipe.IDENTIFIER));
                     p.sendMessage(ChatColor.GREEN + "Switched recipe to " + fccf.getCurrentRecipe().getName());
+                    refreshRecipeInventory(p);
                 }
             }
         };
+    }
+
+    private void refreshRecipeInventory(Player p) {
+        ComponableInventory compInv = buildRecipeInventory(p);
+        compInv.update();
+        compInv.updatePlayerView();
     }
 
     private Clickable buildAutoSelectToggle() {
