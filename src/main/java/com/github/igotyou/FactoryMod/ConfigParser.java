@@ -10,7 +10,6 @@ import com.github.igotyou.FactoryMod.recipes.CompactingRecipe;
 import com.github.igotyou.FactoryMod.recipes.DecompactingRecipe;
 import com.github.igotyou.FactoryMod.recipes.DeterministicEnchantingRecipe;
 import com.github.igotyou.FactoryMod.recipes.DummyParsingRecipe;
-import com.github.igotyou.FactoryMod.recipes.ExtractOilRecipe;
 import com.github.igotyou.FactoryMod.recipes.FactoryMaterialReturnRecipe;
 import com.github.igotyou.FactoryMod.recipes.IRecipe;
 import com.github.igotyou.FactoryMod.recipes.InputRecipe;
@@ -30,12 +29,7 @@ import com.github.igotyou.FactoryMod.recipes.WordBankRecipe;
 import com.github.igotyou.FactoryMod.recipes.heliodor.HeliodorCreateRecipe;
 import com.github.igotyou.FactoryMod.recipes.heliodor.HeliodorFinishRecipe;
 import com.github.igotyou.FactoryMod.recipes.heliodor.HeliodorRefillRecipe;
-import com.github.igotyou.FactoryMod.recipes.heliodor.MeteorForecastRecipe;
 import com.github.igotyou.FactoryMod.recipes.scaling.ProductionRecipeModifier;
-import com.github.igotyou.FactoryMod.recipes.space.BuildRocketRecipe;
-import com.github.igotyou.FactoryMod.recipes.space.CheckResearchProgressRecipe;
-import com.github.igotyou.FactoryMod.recipes.space.OxygenRefillRecipe;
-import com.github.igotyou.FactoryMod.recipes.space.ResearchRecipe;
 import com.github.igotyou.FactoryMod.recipes.upgrade.CharcoalConsumptionUpgradeRecipe;
 import com.github.igotyou.FactoryMod.recipes.upgrade.SpeedUpgradeRecipe;
 import com.github.igotyou.FactoryMod.structures.BlockFurnaceStructure;
@@ -599,53 +593,6 @@ public class ConfigParser {
                 }
                 result = new ProductionRecipe(identifier, name, productionTime, input, output, recipeRepresentation, modi);
                 break;
-            case "EXTRACT_OIL":
-                ConfigurationSection oilOutputSection = config.getConfigurationSection("output");
-                ItemMap oilOutput;
-                ItemStack oilRecipeRepresentation;
-                if (oilOutputSection == null) {
-                    if (!(parentRecipe instanceof ProductionRecipe)) {
-                        oilOutput = new ItemMap();
-                        oilRecipeRepresentation = null;
-                    } else {
-                        oilOutput = ((ProductionRecipe) parentRecipe).getOutput();
-                        oilRecipeRepresentation = ((ProductionRecipe) parentRecipe).getRecipeRepresentation();
-                    }
-                } else {
-                    oilOutput = ConfigHelper.parseItemMap(oilOutputSection);
-                    oilRecipeRepresentation = parseFirstItem(oilOutputSection);
-                }
-                ProductionRecipeModifier oilModi = parseProductionRecipeModifier(config.getConfigurationSection("modi"));
-                if (oilModi == null && parentRecipe instanceof ProductionRecipe
-                    && ((ProductionRecipe) parentRecipe).getModifier() != null) {
-                    oilModi = ((ProductionRecipe) parentRecipe).getModifier().clone();
-                }
-                result = new ExtractOilRecipe(identifier, name, productionTime, input, oilOutput, oilRecipeRepresentation, oilModi);
-                break;
-            case "OXYGEN_REFILL":
-                ConfigurationSection oxygenOutputSection = config.getConfigurationSection("output");
-                ItemMap oxygenOutput;
-                ItemStack oxygenRecipeRepresentation;
-                if (oxygenOutputSection == null) {
-                    if (!(parentRecipe instanceof ProductionRecipe)) {
-                        oxygenOutput = new ItemMap();
-                        oxygenRecipeRepresentation = null;
-                    } else {
-                        oxygenOutput = ((ProductionRecipe) parentRecipe).getOutput();
-                        oxygenRecipeRepresentation = ((ProductionRecipe) parentRecipe).getRecipeRepresentation();
-                    }
-                } else {
-                    oxygenOutput = ConfigHelper.parseItemMap(oxygenOutputSection);
-                    oxygenRecipeRepresentation = parseFirstItem(oxygenOutputSection);
-                }
-                ProductionRecipeModifier oxygenModi = parseProductionRecipeModifier(config.getConfigurationSection("modi"));
-                if (oxygenModi == null && parentRecipe instanceof ProductionRecipe
-                    && ((ProductionRecipe) parentRecipe).getModifier() != null) {
-                    oxygenModi = ((ProductionRecipe) parentRecipe).getModifier().clone();
-                }
-                result = new OxygenRefillRecipe(identifier, name, productionTime, input, oxygenOutput,
-                    oxygenRecipeRepresentation, oxygenModi);
-                break;
             case "COMPACT":
                 String compactedLore = config.getString("compact_lore",
                     (parentRecipe instanceof CompactingRecipe) ? ((CompactingRecipe) parentRecipe).getCompactedLore()
@@ -1024,24 +971,6 @@ public class ConfigParser {
                     break;
                 }
                 result = new HeliodorFinishRecipe(identifier, name, productionTime, input, inputCount, outputCountFinish);
-                break;
-            case "BUILD_ROCKET":
-                result = new BuildRocketRecipe(identifier, name, productionTime, input, config.getString("world"));
-                break;
-            case "RESEARCH":
-                int researchPhase = config.getInt("phase", 0);
-                if (researchPhase != 1 && researchPhase != 2) {
-                    plugin.warning("Invalid research phase for recipe " + name + ". Expected 1 or 2. Skipping it");
-                    result = null;
-                    break;
-                }
-                result = new ResearchRecipe(identifier, name, productionTime, input, researchPhase);
-                break;
-            case "CHECK_RESEARCH_PROGRESS":
-                result = new CheckResearchProgressRecipe(identifier, name, productionTime, input);
-                break;
-            case "METEOR_FORECAST":
-                result = new MeteorForecastRecipe(identifier, name, productionTime, input);
                 break;
             default:
                 plugin.severe("Could not identify type " + config.getString("type") + " as a valid recipe identifier");
