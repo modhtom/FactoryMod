@@ -146,7 +146,8 @@ public class WordBankRecipe extends InputRecipe {
     }
 
     @Override
-    public EffectFeasibility evaluateEffectFeasibility(Inventory inputInv, Inventory outputInv) {
+    public EffectFeasibility evaluateEffectFeasibility(Inventory inputInv, Inventory outputInv,
+                                                        FurnCraftChestFactory fccf) {
         ItemStack toApply = inputInv.getItem(0);
         if (ItemUtils.isValidItem(toApply) && isWordBanked(toApply)) {
             return new EffectFeasibility(false, "the item has already been wordbanked");
