@@ -1,31 +1,40 @@
 # FactoryMod (Fabric Port)
 
-FactoryMod is a Minecraft mod featuring specialized crafting machines that can consume and produce goods efficiently. Originally an iconic Bukkit/Spigot plugin for servers like Civcraft, CivClassics, and EdenMC, this is a **Fabric 1.21.11** port of the mod!
+FactoryMod is a Minecraft Fabric mod (originally a Bukkit plugin) that introduces specialized, multi-block crafting machines which can consume and produce goods based on custom configurations.
 
-FactoryMod's flexible configurability means admins can drastically improve upon a vanilla Minecraft economy by creating:
-* Tech trees with precise control over depth and difficulty
-* Incentives for cooperation through permanence of capital
-* A way for players to obtain survival-unobtainable items
+This repository contains the **Fabric 1.21.11** port of the classic FactoryMod plugin.
 
 ## Features
-* **Fabric 1.21.11 Compatibility:** Fully ported to Fabric!
-* **Multi-block Factories:** Create static factory structures by placing a furnace, crafting bench, and chest together.
-* **EdenMC Recipes:** Comes pre-configured with a modified version of the EdenMC economy config.
-* **SGUI Menus:** Use `/fm` or hit a Crafting Table with a stick to open a beautiful, paginated chest GUI. You can browse all available factories, check their setup costs, and explore inputs, outputs, and times for every recipe without looking up a wiki!
-* **Fuel & Upkeep:** Factories require fuel (Charcoal by default) and have repair costs, working as an upkeep mechanism.
 
-## Commands
-* `/fm`, `/factory`, `/factories` - Opens the interactive GUI to view all available factories and recipes.
+- **Custom Factories**: Create configurable factories using a Furnace, Crafting Table, and Chest.
+- **Tech Trees**: Create deep, complex tech trees that require significant investment and encourage cooperation.
+- **Improved Economy**: Offer better yields for vanilla items, or create items that are otherwise unobtainable in survival.
+- **Paginated GUI Menu**: Type `/fm` or hit a Crafting Table with a Stick to browse the available factories and their recipes in a user-friendly GUI.
+- **Configurable**: Easily configure factory setup costs, recipes, fuel consumption, production times, and more in `config/factorymod.yml`.
 
-## How to use
-1. **View Factories:** Run `/fm` to open the GUI and check the *Setup Cost* for the factory you want to build.
-2. **Build the Structure:** Place a Furnace, a Crafting Table, and a Chest next to each other.
-3. **Setup:** Place the required Setup Cost items into the chest.
-4. **Initialize:** Hit the Crafting Table with a Stick.
-5. **Craft:** Place fuel (e.g. Charcoal) in the Furnace, put the recipe inputs in the Chest, and hit the Crafting Table with a stick to select a recipe. Hit the Furnace with a stick to run the factory!
+## Installation
 
-## Configuration
-The `config/factorymod.yml` file is generated on first startup. You can customize the factory trees, setup costs, inputs, outputs, and update ticks here.
+1. Drop the `.jar` file from the [Releases](#) tab into your server's `mods/` directory.
+2. Start the server.
+3. Open `config/factorymod.yml` to customize your factories and recipes. A default configuration (based on EdenMC) will be automatically generated.
+
+## Usage
+
+1. **Place the Blocks**: Place a Furnace, a Crafting Table, and a Chest next to each other.
+2. **Setup Cost**: Place the required setup cost materials into the Chest.
+3. **Create the Factory**: Hit the Crafting Table with a Stick.
+4. **Choose a Recipe**: Hit the Crafting Table with a Stick again to browse and select a recipe.
+5. **Run the Factory**: Place the required ingredients and fuel (e.g. Charcoal) into the chest/furnace, and hit the Furnace with a Stick to start production!
+
+## Compiling
+
+To build the project from source, clone this repository and run:
+
+```bash
+./gradlew build
+```
+
+The compiled JAR will be located in `build/libs/`.
 
 ---
-*Adapted from the original [igotyou/FactoryMod](https://github.com/igotyou/FactoryMod) plugin.*
+*Based on the original FactoryMod plugin by the Civcraft/Civclassics community.*
