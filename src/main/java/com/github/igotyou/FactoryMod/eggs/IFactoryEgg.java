@@ -2,7 +2,7 @@ package com.github.igotyou.FactoryMod.eggs;
 
 import com.github.igotyou.FactoryMod.factories.Factory;
 import com.github.igotyou.FactoryMod.structures.MultiBlockStructure;
-import org.bukkit.entity.Player;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * This represents the design pattern "Factory", but because that word was
@@ -19,10 +19,10 @@ public interface IFactoryEgg {
      * required checks are already done.
      *
      * @param mbs Physical representation of the factory which should be created
-     * @param p   Player creating the factory
+     * @param p   ServerPlayer creating the factory
      * @return The created factory object
      */
-    public Factory hatch(MultiBlockStructure mbs, Player p);
+    public Factory hatch(MultiBlockStructure mbs, ServerPlayer p);
 
     /**
      * Each egg has a name which is also carried over to identify the type of

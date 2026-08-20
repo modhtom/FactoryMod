@@ -1,44 +1,17 @@
 package com.github.igotyou.FactoryMod;
 
 import java.util.UUID;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import vg.civcraft.mc.civmodcore.players.settings.PlayerSettingAPI;
-import vg.civcraft.mc.civmodcore.players.settings.gui.MenuSection;
-import vg.civcraft.mc.civmodcore.players.settings.impl.EnumSetting;
 
 public class FactoryModPlayerSettings {
 
     private final FactoryMod plugin;
-    EnumSetting<IoConfigDirectionMode> ioDirectionSetting;
 
     public FactoryModPlayerSettings(FactoryMod plugin) {
         this.plugin = plugin;
-        initSettings();
-    }
-
-    private void initSettings() {
-        MenuSection menu = PlayerSettingAPI.getMainMenu().createMenuSection(
-            "FactoryMod",
-            "FactoryMod settings",
-            new ItemStack(Material.FURNACE)
-        );
-
-        ioDirectionSetting = new EnumSetting<>(
-            plugin,
-            IoConfigDirectionMode.VISUAL_RELATIVE,
-            "Factory IOConfig Mode",
-            "ioconfig_visual_mode",
-            new ItemStack(Material.HOPPER),
-            "Change how the factory IO config appears",
-            true,
-            IoConfigDirectionMode.class
-        );
-        PlayerSettingAPI.registerSetting(ioDirectionSetting, menu);
     }
 
     public IoConfigDirectionMode getIoDirectionMode(UUID id) {
-        return ioDirectionSetting.getValue(id);
+        return IoConfigDirectionMode.VISUAL_RELATIVE;
     }
 
     public enum IoConfigDirectionMode {

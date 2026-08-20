@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "factorymod",
+  "version": "${version}",
+  "name": "FactoryMod",
+  "description": "A server-side mod allowing you to construct factories for crafting complex items.",
+  "authors": [
+    "igotyou",
+    "Maxter",
+    "Gjum"
+  ],
+  "contact": {
+    "homepage": "https://github.com/igotyou/FactoryMod",
+    "sources": "https://github.com/igotyou/FactoryMod"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/factorymod/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "com.github.igotyou.FactoryMod.FactoryMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "minecraft": "*",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

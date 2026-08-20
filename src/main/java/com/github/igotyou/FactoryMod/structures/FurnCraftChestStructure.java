@@ -1,116 +1,80 @@
 package com.github.igotyou.FactoryMod.structures;
 
-import java.util.LinkedList;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import java.util.List;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
+import java.util.ArrayList;
 
-/**
- * Physical representation of a factory consisting of a chest, a crafting table
- * and a furnace. The crafting table has to be inbetween the furnace and chest.
- * The chest may be a double chest, but the part of the double chest not
- * adjacent to the crafting table is ignored when doing any checks
- */
-public class FurnCraftChestStructure extends MultiBlockStructure {
-
-    private Location craftingTable;
-    private Location furnace;
-    private Location chest;
+public class FurnCraftChestStructure extends MultiBlockStructure { 
+    private BlockPos craftingTable;
+    private BlockPos furnace;
+    private BlockPos chest;
     private boolean complete;
 
-    public FurnCraftChestStructure(Block center) {
-        if (center.getType() == Material.CRAFTING_TABLE) {
-            craftingTable = center.getLocation();
-            LinkedList<Block> chestBlocks = new LinkedList<>();
-            chestBlocks.addAll(searchForBlockOnAllSides(center, Material.CHEST));
-            chestBlocks.addAll(searchForBlockOnAllSides(center, Material.TRAPPED_CHEST));
-            chestBlocks.addAll(searchForBlockOnAllSides(center, Material.BARREL));
-            for (Block b : chestBlocks) {
-                BlockFace chestFace = center.getFace(b);
-                if (chestFace == null) continue; // fricc off nullcheck
-                BlockFace furnaceFace = chestFace.getOppositeFace();
-                Block furnaceBlock = center.getRelative(furnaceFace);
-                if (furnaceBlock.getType() == Material.FURNACE) {
-                    chest = b.getLocation();
-                    furnace = furnaceBlock.getLocation();
+    public FurnCraftChestStructure(ServerLevel world, BlockPos center) { 
+        super(world);
+        if (world.getBlockState(center).is(Blocks.CRAFTING_TABLE)) {
+            this.craftingTable = center;
+            List<BlockPos> chestBlocks = new ArrayList<>();
+            for (Direction d : Direction.values()) {
+                BlockState s = world.getBlockState(center.relative(d));
+                if (s.is(Blocks.CHEST) || s.is(Blocks.TRAPPED_CHEST) || s.is(Blocks.BARREL)) {
+                    chestBlocks.add(center.relative(d));
+                }
+            }
+            
+            for (BlockPos b : chestBlocks) {
+                // Find face from center to b
+                Direction chestFace = null;
+                for (Direction d : Direction.values()) {
+                    if (center.relative(d).equals(b)) {
+                        chestFace = d; break;
+                    }
+                }
+                if (chestFace == null) continue;
+                Direction furnaceFace = chestFace.getOpposite();
+                BlockPos furnaceBlock = center.relative(furnaceFace);
+                if (world.getBlockState(furnaceBlock).is(Blocks.FURNACE)) {
+                    this.chest = b;
+                    this.furnace = furnaceBlock;
                     break;
                 }
             }
         }
-        complete = chest != null && furnace != null;
+        this.complete = this.chest != null && this.furnace != null;
+    } 
+
+    public FurnCraftChestStructure(ServerLevel world, List<BlockPos> blocks) {
+        super(world);
+        this.craftingTable = blocks.get(0);
+        this.furnace = blocks.get(1);
+        this.chest = blocks.get(2);
+        recheckComplete();
     }
 
-    public FurnCraftChestStructure(List<Location> blocks) {
-        craftingTable = blocks.get(0);
-        furnace = blocks.get(1);
-        chest = blocks.get(2);
+    public void recheckComplete() { 
+        this.complete = craftingTable != null && world.getBlockState(craftingTable).is(Blocks.CRAFTING_TABLE)
+                     && furnace != null && world.getBlockState(furnace).is(Blocks.FURNACE)
+                     && chest != null && (world.getBlockState(chest).is(Blocks.CHEST) || world.getBlockState(chest).is(Blocks.TRAPPED_CHEST) || world.getBlockState(chest).is(Blocks.BARREL));
+    } 
+    
+    public boolean isComplete() { return complete; } 
+    public BlockPos getCenter() { return craftingTable; } 
+    
+    public List<BlockPos> getAllBlocks() { 
+        List<BlockPos> list = new ArrayList<>();
+        list.add(craftingTable); list.add(furnace); list.add(chest);
+        return list;
+    } 
+    
+    public List<BlockPos> getRelevantBlocks() { 
+        return getAllBlocks();
     }
-
-    public void recheckComplete() {
-        complete = craftingTable != null
-            && craftingTable.getBlock().getType() == Material.CRAFTING_TABLE
-            && furnace != null
-            && furnace.getBlock().getType() == Material.FURNACE
-            && chest != null
-            && (chest.getBlock().getType() == Material.CHEST
-            || chest.getBlock().getType() == Material.TRAPPED_CHEST
-            || chest.getBlock().getType() == Material.BARREL);
-    }
-
-    public boolean isComplete() {
-        return complete;
-    }
-
-    public Block getCraftingTable() {
-        return craftingTable.getBlock();
-    }
-
-    public Block getFurnace() {
-        return furnace.getBlock();
-    }
-
-    public Block getChest() {
-        // sometimes a double chest will go across chunk borders and the other
-        // half of the chest might be unloaded. To load the other half and the
-        // full inventory this is needed to load the chunk
-        MultiBlockStructure.searchForBlockOnAllSides(chest.getBlock(),
-            Material.CHEST);
-        MultiBlockStructure.searchForBlockOnAllSides(chest.getBlock(),
-            Material.TRAPPED_CHEST);
-
-        // not necessary to check for more blocks if the "chest" is a barrel because it cannot be double
-
-        return chest.getBlock();
-    }
-
-    public boolean relevantBlocksDestroyed() {
-        return craftingTable.getBlock().getType() != Material.CRAFTING_TABLE
-            && furnace.getBlock().getType() != Material.FURNACE
-            && chest.getBlock().getType() != Material.CHEST
-            && chest.getBlock().getType() != Material.TRAPPED_CHEST
-            && chest.getBlock().getType() != Material.BARREL;
-    }
-
-    public List<Block> getRelevantBlocks() {
-        LinkedList<Block> result = new LinkedList<>();
-        result.add(getCraftingTable());
-        result.add(getFurnace());
-        result.add(getChest());
-        return result;
-    }
-
-    public List<Location> getAllBlocks() {
-        LinkedList<Location> result = new LinkedList<>();
-        result.add(craftingTable);
-        result.add(furnace);
-        result.add(chest);
-        return result;
-    }
-
-    public Location getCenter() {
-        return craftingTable;
-    }
-
+    
+    public BlockPos getCraftingTable() { return craftingTable; }
+    public BlockPos getFurnace() { return furnace; }
+    public BlockPos getChest() { return chest; }
 }

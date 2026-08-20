@@ -1,24 +1,16 @@
 package com.github.igotyou.FactoryMod.recipes;
 
-import com.github.igotyou.FactoryMod.factories.FurnCraftChestFactory;
-import com.github.igotyou.FactoryMod.repairManager.PercentageHealthRepairManager;
-import com.github.igotyou.FactoryMod.utility.LoggingUtils;
+import com.github.igotyou.FactoryMod.factories.Factory;
+import com.github.igotyou.FactoryMod.utility.ItemMap;
+import com.github.igotyou.FactoryMod.utility.ItemUtils;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.github.igotyou.FactoryMod.utility.MultiInventoryWrapper;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import vg.civcraft.mc.civmodcore.inventory.items.ItemMap;
-import vg.civcraft.mc.civmodcore.inventory.items.ItemUtils;
-
-/**
- * Used to repair FurnCraftChest factories. Once one of those factories is in
- * disrepair the only recipe that can be run is one of this kind
- */
 public class RepairRecipe extends InputRecipe {
 
     private int healthPerRun;
@@ -30,43 +22,32 @@ public class RepairRecipe extends InputRecipe {
     }
 
     @Override
-    public List<ItemStack> getOutputRepresentation(Inventory i, FurnCraftChestFactory fccf) {
+    public List<ItemStack> getOutputRepresentation(Container i, Factory fccf) {
         List<ItemStack> result = new LinkedList<>();
-        ItemStack furn = new ItemStack(Material.FURNACE);
-        ItemUtils.setLore(furn, "+" + String.valueOf(healthPerRun) + " health");
+        ItemStack furn = new ItemStack(Items.FURNACE);
+        ItemUtils.setLore(furn, "+" + healthPerRun + " health");
         result.add(furn);
         return result;
     }
 
     @Override
-    public List<ItemStack> getInputRepresentation(Inventory i, FurnCraftChestFactory fccf) {
-        if (i == null) {
-            return input.getItemStackRepresentation();
-        }
-        return createLoredStacksForInfo(i);
-    }
-
-    @Override
-    public boolean applyEffect(Inventory inputInv, Inventory outputInv, FurnCraftChestFactory fccf) {
-        MultiInventoryWrapper combo = new MultiInventoryWrapper(inputInv, outputInv);
-        logBeforeRecipeRun(combo, fccf);
+    public boolean applyEffect(Container inputInv, Container outputInv, Factory fccf) {
         if (enoughMaterialAvailable(inputInv)) {
             if (input.removeSafelyFrom(inputInv)) {
-                ((PercentageHealthRepairManager) (fccf.getRepairManager()))
-                    .repair(healthPerRun);
-                LoggingUtils.log(((PercentageHealthRepairManager) (fccf
-                    .getRepairManager())).getHealth()
-                    + " for "
-                    + fccf.getLogData() + " after repairing");
+                fccf.repair(healthPerRun);
             }
+            return true;
         }
-        logAfterRecipeRun(combo, fccf);
-        return true;
+        return false;
     }
-
+    
     @Override
-    public Material getRecipeRepresentationMaterial() {
-        return Material.FURNACE;
+    public boolean enoughMaterialAvailable(Container inputInv) {
+        ItemMap inMap = new ItemMap();
+        for(int i=0; i<inputInv.getContainerSize(); i++) {
+             inMap.addItemStack(inputInv.getItem(i));
+        }
+        return input.isContainedIn(inMap);
     }
 
     @Override
@@ -79,7 +60,21 @@ public class RepairRecipe extends InputRecipe {
     }
 
     @Override
-    public List<String> getTextualOutputRepresentation(Inventory i, FurnCraftChestFactory fccf) {
-        return Arrays.asList(ChatColor.YELLOW + "Repairs the factory by " + healthPerRun + " health");
+    public List<String> getTextualOutputRepresentation(Container i, Factory fccf) {
+        return Arrays.asList("Repairs the factory by " + healthPerRun + " health");
+    }
+
+    public EffectFeasibility evaluateEffectFeasibility(Container inputInv, Container outputInv, Factory fccf) {
+        return new EffectFeasibility(enoughMaterialAvailable(inputInv), "");
+    }
+    
+    public ItemStack getRecipeRepresentation() {
+        return new ItemStack(Items.FURNACE);
+    }
+    
+    public List<ItemStack> getInputRepresentation(Container i, Factory r) {
+        List<ItemStack> res = new ArrayList<>();
+        res.addAll(input.getItemStackRepresentation());
+        return res;
     }
 }

@@ -1,40 +1,38 @@
 package com.github.igotyou.FactoryMod;
 
-import com.github.igotyou.FactoryMod.commands.FMCommandManager;
-import com.github.igotyou.FactoryMod.listeners.CitadelListener;
-import com.github.igotyou.FactoryMod.listeners.CompactItemListener;
-import com.github.igotyou.FactoryMod.listeners.FactoryModListener;
-import com.github.igotyou.FactoryMod.utility.FactoryModPermissionManager;
-import vg.civcraft.mc.civmodcore.ACivMod;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class FactoryMod extends ACivMod {
+public class FactoryMod implements ModInitializer {
 
     private FactoryModManager manager;
     private static FactoryMod plugin;
-    private FactoryModPermissionManager permissionManager;
-    private FMCommandManager commandManager;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger("FactoryMod");
 
     @Override
-    public void onEnable() {
-        super.onEnable();
+    public void onInitialize() {
         plugin = this;
-        ConfigParser cp = new ConfigParser(this);
-        manager = cp.parse();
-        manager.loadFactories();
-        if (manager.isCitadelEnabled()) {
-            permissionManager = new FactoryModPermissionManager();
-        }
-        commandManager = new FMCommandManager(this);
+        com.github.igotyou.FactoryMod.utility.TaskScheduler.init();
+        com.github.igotyou.FactoryMod.commands.FactoryModCommand.register();
+        
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            ConfigParser cp = new ConfigParser(this);
+            manager = cp.parse();
+            manager.loadFactories();
+        });
+        
         registerListeners();
-        info("Successfully enabled");
+        LOGGER.info("FactoryMod successfully enabled");
     }
 
-    @Override
     public void onDisable() {
         if (manager != null) {
             manager.shutDown();
         }
-        info("Shutting down");
+        LOGGER.info("FactoryMod shutting down");
     }
 
     public FactoryModManager getManager() {
@@ -45,19 +43,24 @@ public class FactoryMod extends ACivMod {
         return plugin;
     }
 
-    public FactoryModPermissionManager getPermissionManager() {
-        return permissionManager;
+    public static Logger getLogger() {
+        return LOGGER;
+    }
+
+    public void info(String message) {
+        LOGGER.info(message);
+    }
+    
+    public void warning(String message) {
+        LOGGER.warn(message);
+    }
+    
+    public void severe(String message) {
+        LOGGER.error(message);
     }
 
     private void registerListeners() {
-        plugin.getServer().getPluginManager()
-            .registerEvents(new FactoryModListener(manager), plugin);
-        plugin.getServer()
-            .getPluginManager()
-            .registerEvents(
-                new CompactItemListener(), plugin);
-        if (manager.isCitadelEnabled()) {
-            plugin.getServer().getPluginManager().registerEvents(new CitadelListener(), plugin);
-        }
+        com.github.igotyou.FactoryMod.listeners.InteractionListener.register();
+        
     }
 }

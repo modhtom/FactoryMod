@@ -1,19 +1,16 @@
 package com.github.igotyou.FactoryMod.recipes;
 
-import com.github.igotyou.FactoryMod.factories.FurnCraftChestFactory;
+import com.github.igotyou.FactoryMod.factories.Factory;
+import com.github.igotyou.FactoryMod.utility.ItemMap;
+import com.github.igotyou.FactoryMod.utility.ItemUtils;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
-
-import com.github.igotyou.FactoryMod.utility.MultiInventoryWrapper;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import vg.civcraft.mc.civmodcore.inventory.items.ItemMap;
-import vg.civcraft.mc.civmodcore.inventory.items.ItemUtils;
 
 public class PylonRecipe extends InputRecipe {
 
@@ -30,18 +27,31 @@ public class PylonRecipe extends InputRecipe {
     }
 
     @Override
-    public boolean applyEffect(Inventory inputInv, Inventory outputInv, FurnCraftChestFactory fccf) {
-        MultiInventoryWrapper combo = new MultiInventoryWrapper(inputInv, outputInv);
-        if (!input.isContainedIn(inputInv)) {
+    public boolean applyEffect(Container inputInv, Container outputInv, Factory fccf) {
+        ItemMap inMap = new ItemMap();
+        for(int i=0; i<inputInv.getContainerSize(); i++) {
+             inMap.addItemStack(inputInv.getItem(i));
+        }
+        if (!input.isContainedIn(inMap)) {
             return false;
         }
         ItemMap actualOutput = getCurrentOutput();
-        if (!actualOutput.fitsIn(outputInv)) {
-            return false;
-        }
         if (input.removeSafelyFrom(inputInv)) {
             for (ItemStack is : actualOutput.getItemStackRepresentation()) {
-                outputInv.addItem(is);
+                for(int j=0; j<outputInv.getContainerSize(); j++) {
+                    ItemStack outSlot = outputInv.getItem(j);
+                    if(outSlot.isEmpty()) {
+                        outputInv.setItem(j, is.copy());
+                        break;
+                    } else if(ItemStack.isSameItemSameComponents(outSlot, is)) {
+                        int canAdd = Math.min(is.getCount(), outSlot.getMaxStackSize() - outSlot.getCount());
+                        if(canAdd > 0) {
+                            outSlot.grow(canAdd);
+                            is.shrink(canAdd);
+                            if(is.isEmpty()) break;
+                        }
+                    }
+                }
             }
         }
         return true;
@@ -56,68 +66,35 @@ public class PylonRecipe extends InputRecipe {
     }
 
     @Override
-    public List<ItemStack> getOutputRepresentation(Inventory i, FurnCraftChestFactory fccf) {
+    public List<ItemStack> getOutputRepresentation(Container i, Factory fccf) {
         ItemMap currOut = getCurrentOutput();
-        List<ItemStack> res = new LinkedList<ItemStack>();
+        List<ItemStack> res = new LinkedList<>();
         for (ItemStack is : currOut.getItemStackRepresentation()) {
-            ItemUtils.setLore(is, ChatColor.GOLD + "Currently there are "
-                + FurnCraftChestFactory.getPylonFactories() == null ? "0"
-                : FurnCraftChestFactory.getPylonFactories().size()
-                + " pylons on the map", ChatColor.RED
-                + "Current global weight is " + currentGlobalWeight);
+            ItemUtils.setLore(is, "Pylon factory item", "Current global weight: " + currentGlobalWeight);
             res.add(is);
         }
         return res;
     }
 
     @Override
-    public List<ItemStack> getInputRepresentation(Inventory i, FurnCraftChestFactory fccf) {
-        if (i == null) {
-            return input.getItemStackRepresentation();
+    public boolean enoughMaterialAvailable(Container inputInv) {
+        ItemMap inMap = new ItemMap();
+        for(int i=0; i<inputInv.getContainerSize(); i++) {
+             inMap.addItemStack(inputInv.getItem(i));
         }
-        return createLoredStacksForInfo(i);
-    }
-
-    @Override
-    public Material getRecipeRepresentationMaterial() {
-        return output.getItemStackRepresentation().get(0).getType();
-    }
-
-    @Override
-    public boolean enoughMaterialAvailable(Inventory inputInv) {
-        return input.isContainedIn(inputInv) && skyView();
+        return input.isContainedIn(inMap);
     }
 
     public int getWeight() {
         return weight;
     }
 
-    private boolean skyView() {
-        return true;
-        // place holder in case we want to do something with it in the future
-    }
-
     private ItemMap getCurrentOutput() {
-        int weight = 0;
-        Set<FurnCraftChestFactory> pylons = FurnCraftChestFactory
-            .getPylonFactories();
-        if (pylons != null) {
-            // if not a single factory (not limited to pylon) is in the map,
-            // this will be null
-            for (FurnCraftChestFactory f : pylons) {
-                if (f.isActive() && f.getCurrentRecipe() instanceof PylonRecipe) {
-                    weight += ((PylonRecipe) f.getCurrentRecipe()).getWeight();
-                }
-            }
-        }
-        currentGlobalWeight = weight;
-        double overload = Math.max(1.0, (float) currentGlobalWeight
-            / (float) globalLimit);
+        double overload = Math.max(1.0, (float) currentGlobalWeight / (float) (globalLimit > 0 ? globalLimit : 1));
         double multiplier = 1.0 / overload;
         ItemMap actualOutput = new ItemMap();
-        for (Entry<ItemStack, Integer> entry : output.getAllItems().entrySet()) {
-            actualOutput.addItemAmount(entry.getKey(),
-                (int) (entry.getValue() * multiplier));
+        for (Entry<Item, Integer> entry : output.getAllItems().entrySet()) {
+            actualOutput.addItemAmount(entry.getKey(), (int) (entry.getValue() * multiplier));
         }
         return actualOutput;
     }
@@ -140,13 +117,29 @@ public class PylonRecipe extends InputRecipe {
     }
 
     @Override
-    public List<String> getTextualOutputRepresentation(Inventory i, FurnCraftChestFactory fccf) {
+    public List<String> getTextualOutputRepresentation(Container i, Factory fccf) {
         List<String> result = new ArrayList<>();
-        for (Entry<ItemStack, Integer> entry : output.getAllItems().entrySet()) {
+        for (Entry<Item, Integer> entry : output.getAllItems().entrySet()) {
             if (entry.getValue() > 0) {
-                result.add(entry.getValue() + " " + ItemUtils.getItemName(entry.getKey()));
+                result.add(entry.getValue() + " " + entry.getKey().getName(new ItemStack(entry.getKey())).getString());
             }
         }
         return result;
+    }
+
+    public EffectFeasibility evaluateEffectFeasibility(Container inputInv, Container outputInv, Factory fccf) {
+        return new EffectFeasibility(enoughMaterialAvailable(inputInv), "");
+    }
+    
+    public ItemStack getRecipeRepresentation() {
+        if(!output.getItemStackRepresentation().isEmpty())
+            return output.getItemStackRepresentation().iterator().next().copy();
+        return new ItemStack(net.minecraft.world.item.Items.BEACON);
+    }
+    
+    public List<ItemStack> getInputRepresentation(Container i, Factory r) {
+        List<ItemStack> res = new ArrayList<>();
+        res.addAll(input.getItemStackRepresentation());
+        return res;
     }
 }

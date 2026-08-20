@@ -1,157 +1,81 @@
 package com.github.igotyou.FactoryMod.factories;
 
-import com.github.igotyou.FactoryMod.FactoryMod;
 import com.github.igotyou.FactoryMod.interactionManager.IInteractionManager;
-import com.github.igotyou.FactoryMod.powerManager.IPowerManager;
-import com.github.igotyou.FactoryMod.repairManager.IRepairManager;
 import com.github.igotyou.FactoryMod.structures.MultiBlockStructure;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Furnace;
-import org.bukkit.entity.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
 
-/**
- * Super class for any sort of factory created by this plugin
- */
 public abstract class Factory implements Runnable {
 
     protected IInteractionManager im;
-    protected IRepairManager rm;
-    protected IPowerManager pm;
-    protected boolean active;
     protected MultiBlockStructure mbs;
+    protected boolean active;
     protected int updateTime;
     protected String name;
-    protected int threadId;
+    protected int threadId = -1;
 
-    public Factory(IInteractionManager im, IRepairManager rm, IPowerManager pm, MultiBlockStructure mbs,
-                   int updateTime, String name) {
+    public Factory(IInteractionManager im, MultiBlockStructure mbs, int updateTime, String name) {
         this.im = im;
-        this.rm = rm;
         this.mbs = mbs;
-        this.pm = pm;
         this.updateTime = updateTime;
         this.name = name;
     }
 
-    /**
-     * @return The manager which handles health, repairs and decay of the
-     * factory
-     */
-    public IRepairManager getRepairManager() {
-        return rm;
+    // Legacy constructor for stubs
+    public Factory(String name, MultiBlockStructure mbs, int updateTime) {
+        this.name = name;
+        this.mbs = mbs;
+        this.updateTime = updateTime;
     }
 
-    /**
-     * @return The manager which handles any sort of player interaction with the
-     * factory
-     */
-    public IInteractionManager getInteractionManager() {
-        return im;
-    }
+    public String getName() { return name; }
+    public MultiBlockStructure getMultiBlockStructure() { return mbs; }
+    public boolean isActive() { return active; }
+    public int getUpdateTime() { return updateTime; }
+    public void deactivate() { active = false; }
 
-    /**
-     * @return The manager which handles power and it's consumption for this
-     * factory
-     */
-    public IPowerManager getPowerManager() {
-        return pm;
-    }
-
-    /**
-     * @return Whether this factory is currently turned on
-     */
-    public boolean isActive() {
-        return active;
-    }
-
-    /**
-     * @return The physical structure representing this factory
-     */
-    public MultiBlockStructure getMultiBlockStructure() {
-        return mbs;
-    }
-
-    /**
-     * @return How often this factory is updated when it's turned on, measured
-     * in ticks
-     */
-    public int getUpdateTime() {
-        return updateTime;
-    }
-
-    /**
-     * Names are not unique for factory instances, but simply describe a broader
-     * functionality group. Factories implemented by the same class can have
-     * different names, but factories with the same name should have the exact
-     * same functionality
-     *
-     * @return name of this factory
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Activates this factory
-     */
-    public abstract void activate();
-
-    /**
-     * Deactivates this factory
-     */
-    public abstract void deactivate();
-
-    /**
-     * Attempts to turn this factory on and does any checks needed
-     *
-     * @param p         Player turning the factory on or null if something other than
-     *                  a player is attempting to turn it on
-     * @param onStartUp Whether this factory is just being reactivated after a
-     *                  restart/reload and any permissions checks should be bypassed
-     */
-    public abstract void attemptToActivate(Player p, boolean onStartUp);
+    public abstract void attemptToActivate(ServerPlayer p, boolean onStartUp);
 
     public void scheduleUpdate() {
-        threadId = FactoryMod.getInstance().getServer().getScheduler()
-            .scheduleSyncDelayedTask(FactoryMod.getInstance(), this, getUpdateTime());
+        threadId = com.github.igotyou.FactoryMod.utility.TaskScheduler.scheduleSyncDelayedTask(this, getUpdateTime());
     }
 
-    public void turnFurnaceOn(Block f) {
-        if (f.getType() != Material.FURNACE) {
-            return;
+    public void turnFurnaceOn(ServerLevel world, BlockPos pos) {
+        if (world.getBlockEntity(pos) instanceof FurnaceBlockEntity furnace) {
+            furnace.setChanged();
         }
-        Bukkit.getScheduler().runTask(FactoryMod.getInstance(), () -> {
-            if (this.isActive()) {
-                Furnace furnace = (Furnace) f.getState();
-                furnace.setBurnTime(Short.MAX_VALUE);
-                furnace.update();
-            }
-        });
+    }
+
+    public void turnFurnaceOff(ServerLevel world, BlockPos pos) {
+        if (world.getBlockEntity(pos) instanceof FurnaceBlockEntity furnace) {
+            furnace.setChanged();
+        }
     }
 
     public String getLogData() {
-        return name + " at " + mbs.getCenter().toString();
+        return name + " at " + (mbs != null ? mbs.getCenter() : "unknown");
     }
 
-    public void turnFurnaceOff(Block f) {
-        if (f.getType() != Material.FURNACE) {
-            return;
-        }
-        FactoryMod fmPlugin = FactoryMod.getInstance();
-        if (fmPlugin.isEnabled()) {
-            Bukkit.getScheduler().runTask(FactoryMod.getInstance(), () -> {
-                if (!this.isActive()) {
-                    Furnace furnace = (Furnace) f.getState();
-                    furnace.setBurnTime((short) 0);
-                    furnace.update();
-                }
-            });
-        } else if (!this.isActive()) {
-            Furnace furnace = (Furnace) f.getState();
-            furnace.setBurnTime((short) 0);
-            furnace.update();
-        }
+    public IInteractionManager getInteractionManager() { return im; }
+    public void setInteractionManager(IInteractionManager im) { this.im = im; }
+    
+    // Repair System
+    protected int health = 10000;
+    protected int maxHealth = 10000;
+    
+    public int getHealth() { return health; }
+    public void setHealth(int h) { this.health = Math.min(h, maxHealth); }
+    public int getMaxHealth() { return maxHealth; }
+    
+    public void repair(int amount) {
+        this.health = Math.min(this.health + amount, maxHealth);
     }
+    
+    public Object getRepairManager() { return this; } // Self as repair manager for now
+
+    @Override
+    public void run() {}
 }
+

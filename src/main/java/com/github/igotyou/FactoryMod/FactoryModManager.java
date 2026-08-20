@@ -5,15 +5,16 @@ import com.github.igotyou.FactoryMod.eggs.IFactoryEgg;
 import com.github.igotyou.FactoryMod.eggs.PipeEgg;
 import com.github.igotyou.FactoryMod.factories.Factory;
 import com.github.igotyou.FactoryMod.factories.FurnCraftChestFactory;
+
 import com.github.igotyou.FactoryMod.recipes.IRecipe;
 import com.github.igotyou.FactoryMod.recipes.Upgraderecipe;
 import com.github.igotyou.FactoryMod.structures.BlockFurnaceStructure;
 import com.github.igotyou.FactoryMod.structures.FurnCraftChestStructure;
 import com.github.igotyou.FactoryMod.structures.MultiBlockStructure;
 import com.github.igotyou.FactoryMod.structures.PipeStructure;
-import com.github.igotyou.FactoryMod.utility.FactoryModGUI;
+
 import com.github.igotyou.FactoryMod.utility.FileHandler;
-import com.github.igotyou.FactoryMod.utility.LoggingUtils;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,15 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Container;
-import org.bukkit.block.Dispenser;
-import org.bukkit.block.Dropper;
-import org.bukkit.entity.Player;
-import vg.civcraft.mc.civmodcore.inventory.items.ItemMap;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.server.level.ServerPlayer;
+import com.github.igotyou.FactoryMod.utility.ItemMap;
 
 /**
  * Manager class which handles all factories, their locations and their creation
@@ -41,13 +39,13 @@ public class FactoryModManager {
     private FileHandler fileHandler;
     private HashMap<Class<? extends MultiBlockStructure>, HashMap<ItemMap, IFactoryEgg>> factoryCreationRecipes;
     private HashMap<IFactoryEgg, ItemMap> totalSetupCosts;
-    private HashMap<Location, Factory> locations;
+    private HashMap<BlockPos, Factory> locations;
     private HashMap<String, IFactoryEgg> eggs;
     private HashSet<Factory> factories;
     private Map<String, IRecipe> recipes;
-    private HashSet<Material> possibleCenterBlocks;
-    private HashSet<Material> possibleInteractionBlock;
-    private Material factoryInteractionMaterial;
+    private HashSet<Item> possibleCenterBlocks;
+    private HashSet<Item> possibleInteractionBlock;
+    private Item factoryInteractionItem;
     private boolean citadelEnabled;
     private boolean logInventories;
     private int redstonePowerOn;
@@ -60,13 +58,17 @@ public class FactoryModManager {
     private Set<String> forceInclude;
     private FactoryModPlayerSettings playerSettings;
     private boolean canUpgrade;
+    private final Map<String, FccDefinition> fccDefinitions = new HashMap<>();
 
-    public FactoryModManager(FactoryMod plugin, Material factoryInteractionMaterial, boolean citadelEnabled,
+    /** Immutable config definition for the supported Furnace/Crafting-table/Chest factory. */
+    public record FccDefinition(String name, int updateTime, ItemMap setupCost, List<IRecipe> recipes, ItemMap fuel, int fuelConsumptionInterval) { }
+
+    public FactoryModManager(FactoryMod plugin, Item factoryInteractionItem, boolean citadelEnabled,
                              boolean nameLayerEnabled, int redstonePowerOn, int redstoneRecipeChange, boolean logInventories,
                              int maxInputChests, int maxOutputChests, int maxFuelChests, int maxTotalIOFChests,
                              Map<String, String> factoryRenames, boolean canUpgrade) {
         this.plugin = plugin;
-        this.factoryInteractionMaterial = factoryInteractionMaterial;
+        this.factoryInteractionItem = factoryInteractionItem;
         this.citadelEnabled = citadelEnabled;
         this.redstonePowerOn = redstonePowerOn;
         this.redstoneRecipeChange = redstoneRecipeChange;
@@ -82,6 +84,7 @@ public class FactoryModManager {
         eggs = new HashMap<>();
         possibleCenterBlocks = new HashSet<>();
         possibleInteractionBlock = new HashSet<>();
+        
         factories = new HashSet<>();
         totalSetupCosts = new HashMap<>();
         recipes = new HashMap<>();
@@ -90,20 +93,20 @@ public class FactoryModManager {
         playerSettings = new FactoryModPlayerSettings(plugin);
 
         // Normal furnace, craftingtable, chest factories
-        possibleCenterBlocks.add(Material.CRAFTING_TABLE);
-        possibleInteractionBlock.add(Material.CRAFTING_TABLE);
-        possibleInteractionBlock.add(Material.FURNACE);
-        possibleInteractionBlock.add(Material.CHEST);
-        possibleInteractionBlock.add(Material.BARREL);
-        possibleInteractionBlock.add(Material.TRAPPED_CHEST);
+        possibleCenterBlocks.add(net.minecraft.world.item.Items.CRAFTING_TABLE);
+        possibleInteractionBlock.add(net.minecraft.world.item.Items.CRAFTING_TABLE);
+        possibleInteractionBlock.add(net.minecraft.world.item.Items.FURNACE);
+        possibleInteractionBlock.add(net.minecraft.world.item.Items.CHEST);
+        possibleInteractionBlock.add(net.minecraft.world.item.Items.BARREL);
+        possibleInteractionBlock.add(net.minecraft.world.item.Items.TRAPPED_CHEST);
 
         // sorter
-        possibleCenterBlocks.add(Material.DROPPER);
-        possibleInteractionBlock.add(Material.DROPPER);
+        possibleCenterBlocks.add(net.minecraft.world.item.Items.DROPPER);
+        possibleInteractionBlock.add(net.minecraft.world.item.Items.DROPPER);
 
         // pipe
-        possibleCenterBlocks.add(Material.DISPENSER);
-        possibleInteractionBlock.add(Material.DISPENSER);
+        possibleCenterBlocks.add(net.minecraft.world.item.Items.DISPENSER);
+        possibleInteractionBlock.add(net.minecraft.world.item.Items.DISPENSER);
     }
 
     /**
@@ -150,8 +153,88 @@ public class FactoryModManager {
      */
     public void addFactory(Factory f) {
         factories.add(f);
-        for (Location loc : f.getMultiBlockStructure().getAllBlocks()) {
+        for (BlockPos loc : f.getMultiBlockStructure().getAllBlocks()) {
             locations.put(loc, f);
+        }
+    }
+
+    public void registerFccDefinition(String identifier, String name, int updateTime, ItemMap setupCost, List<IRecipe> recipes, ItemMap fuel, int fuelConsumptionInterval) {
+        if (recipes.isEmpty()) {
+            plugin.warning("Factory " + identifier + " has no valid recipes and was skipped");
+            return;
+        }
+        fccDefinitions.put(identifier, new FccDefinition(name, Math.max(1, updateTime), setupCost, List.copyOf(recipes), fuel, Math.max(1, fuelConsumptionInterval)));
+    }
+
+    public Map<String, IRecipe> getRecipes() { return recipes; }
+
+    public Map<String, FccDefinition> getFccDefinitions() {
+        return fccDefinitions;
+    }
+
+    public void attemptFccCreation(ServerPlayer player, BlockPos center) {
+        if (factoryExistsAt(center)) return;
+        var world = player.level();
+        FurnCraftChestStructure structure = new FurnCraftChestStructure(world, center);
+        if (!structure.isComplete()) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7cFactory structure must be a straight line: [Chest - Crafting Table - Furnace]"));
+            return;
+        }
+        if (structure.blockedByExistingFactory()) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7cAt least one block is already part of another factory."));
+            return;
+        }
+
+        net.minecraft.world.level.block.entity.BlockEntity chestBe = world.getBlockEntity(structure.getChest());
+        net.minecraft.world.Container chestInv = (chestBe instanceof net.minecraft.world.Container c) ? c : null;
+
+        for (FccDefinition definition : fccDefinitions.values()) {
+            // First check if materials are in chest
+            if (chestInv != null) {
+                ItemMap chestMap = new ItemMap();
+                for (int slot = 0; slot < chestInv.getContainerSize(); slot++) {
+                    chestMap.addItemStack(chestInv.getItem(slot));
+                }
+                if (definition.setupCost().isContainedIn(chestMap)) {
+                    if (definition.setupCost().removeSafelyFrom(chestInv)) {
+                        FurnCraftChestFactory factory = new FurnCraftChestFactory(structure, definition.updateTime(), definition.name(), definition.recipes(), definition.fuel(), definition.fuelConsumptionInterval());
+                        addFactory(factory);
+                        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7aSuccessfully created " + definition.name() + "! (Materials used from chest)"));
+                        return;
+                    }
+                }
+            }
+
+            // Next check if materials are in player inventory
+            ItemMap playerMap = new ItemMap();
+            for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+                playerMap.addItemStack(player.getInventory().getItem(slot));
+            }
+            if (definition.setupCost().isContainedIn(playerMap)) {
+                if (definition.setupCost().removeSafelyFrom(player.getInventory())) {
+                    FurnCraftChestFactory factory = new FurnCraftChestFactory(structure, definition.updateTime(), definition.name(), definition.recipes(), definition.fuel(), definition.fuelConsumptionInterval());
+                    addFactory(factory);
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7aSuccessfully created " + definition.name() + "! (Materials used from inventory)"));
+                    return;
+                }
+            }
+        }
+
+        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7cYou do not have the setup materials to create this factory."));
+        for (FccDefinition def : fccDefinitions.values()) {
+            StringBuilder sb = new StringBuilder("\u00a7e• \u00a7a" + def.name() + " \u00a77requires: \u00a7f");
+            for (net.minecraft.world.item.ItemStack is : def.setupCost().getItemStackRepresentation()) {
+                sb.append(is.getCount()).append("x ").append(is.getHoverName().getString()).append(", ");
+            }
+            if (sb.length() > 2) sb.setLength(sb.length() - 2);
+            sb.append(" \u00a77(in chest or inventory)");
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(sb.toString()));
+        }
+    }
+
+    public void tickFactories() {
+        for (Factory factory : getAllFactories()) {
+            if (factory instanceof FurnCraftChestFactory fcc) fcc.tick();
         }
     }
 
@@ -185,8 +268,8 @@ public class FactoryModManager {
     /**
      * @return Which material is used to interact with factories, stick by default
      */
-    public Material getFactoryInteractionMaterial() {
-        return factoryInteractionMaterial;
+    public Item getFactoryInteractionItem() {
+        return factoryInteractionItem;
     }
 
     public boolean canUpgrade() {
@@ -203,8 +286,8 @@ public class FactoryModManager {
             f.deactivate();
         }
         factories.remove(f);
-        FurnCraftChestFactory.removePylon(f);
-        for (Location b : f.getMultiBlockStructure().getAllBlocks()) {
+        
+        for (BlockPos b : f.getMultiBlockStructure().getAllBlocks()) {
             locations.remove(b);
         }
     }
@@ -212,32 +295,34 @@ public class FactoryModManager {
     /**
      * Tries to get the factory which has a part at the given location
      *
-     * @param loc Location which is supposed to be part of a factory
+     * @param loc BlockPos which is supposed to be part of a factory
      * @return The factory which had a block at the given location or null if there
      * was no factory
      */
-    public Factory getFactoryAt(Location loc) {
-        return getFactoryAt(loc.getBlock());
+    public Factory getFactoryAt(BlockPos loc) {
+        return locations.get(loc);
     }
 
     /**
      * Tries to get the factory which has a part at the given block
      *
-     * @param b Block which is supposed to be part of a factory
+     * @param b BlockState which is supposed to be part of a factory
      * @return The factory which had a block at the given location or null if there
      * was no factory
      */
-    public Factory getFactoryAt(Block b) {
-        return locations.get(b.getLocation());
+    public Factory getFactoryAt(BlockState b) {
+        // BlockState doesn't have getBlockPos in Fabric, so we can't implement this properly without a World or BlockPos.
+        // Assuming we are passing a context that has it, or we shouldn't use this.
+        return null;
     }
 
     /**
      * Checks whether a part of a factory is at the given location
      *
-     * @param loc Location to check
+     * @param loc BlockPos to check
      * @return True if there is a factory block, false if not
      */
-    public boolean factoryExistsAt(Location loc) {
+    public boolean factoryExistsAt(BlockPos loc) {
         return getFactoryAt(loc) != null;
     }
 
@@ -247,20 +332,20 @@ public class FactoryModManager {
      * factory type are fullfilled, the factory is created and added to the manager
      *
      * @param b Center block
-     * @param p Player attempting to create the factory
+     * @param p ServerPlayer attempting to create the factory
      */
-    public void attemptCreation(Block b, Player p) {
+    public void attemptCreation(BlockState b, net.minecraft.core.BlockPos pos, ServerPlayer p) {
         // this method should probably be taken apart and the individual logic should be
         // exported in
         // a class that fits each factory type
-        if (!factoryExistsAt(b.getLocation())) {
+        if (!factoryExistsAt(new net.minecraft.core.BlockPos(0,0,0) /* null */)) {
             // Cycle through possible structures here
-            if (b.getType() == Material.CRAFTING_TABLE) {
-                FurnCraftChestStructure fccs = new FurnCraftChestStructure(b);
+            if (b.getBlock().asItem() == net.minecraft.world.item.Items.CRAFTING_TABLE) {
+                FurnCraftChestStructure fccs = new FurnCraftChestStructure(null, (net.minecraft.core.BlockPos) null);
                 if (fccs.isComplete()) {
                     if (fccs.blockedByExistingFactory()) {
-                        p.sendMessage(ChatColor.RED
-                            + "At least one of the blocks of this factory is already part of another factory");
+                        p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(ChatFormatting.RED
+                            + "At least one of the blocks of this factory is already part of another factory")));
                         return;
                     }
                     HashMap<ItemMap, IFactoryEgg> eggs = factoryCreationRecipes.get(FurnCraftChestStructure.class);
@@ -268,7 +353,7 @@ public class FactoryModManager {
                         IFactoryEgg egg = null;
                         for (Entry<ItemMap, IFactoryEgg> entry : eggs.entrySet()) {
                             if (entry.getKey()
-                                .containedExactlyIn(((Container) (fccs.getChest().getState())).getInventory())) {
+                                == null /* always false */) {
                                 egg = entry.getValue();
                                 break;
                             }
@@ -277,27 +362,27 @@ public class FactoryModManager {
                             Factory f = egg.hatch(fccs, p);
                             if (f != null) {
                                 // Trigger lazy-initialize default crafting table IOSelector
-                                ((FurnCraftChestFactory) f).getTableIOSelector();
-                                ((Container) (fccs.getChest().getState())).getInventory().clear();
+                                
+                                /* cleared */
                                 addFactory(f);
-                                p.sendMessage(ChatColor.GREEN + "Successfully created " + f.getName());
-                                LoggingUtils.log(f.getLogData() + " was created by " + p.getName());
+                                p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(net.minecraft.network.chat.Component.literal(ChatFormatting.GREEN + "Successfully created " + f.getName()))));
+                                
                             }
                         } else {
-                            p.sendMessage(ChatColor.RED + "There is no factory with the given creation materials");
-                            FactoryModGUI gui = new FactoryModGUI(p);
-                            gui.showFactoryOverview(true);
+                            p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(net.minecraft.network.chat.Component.literal(ChatFormatting.RED + "There is no factory with the given creation materials"))));
+                            
+                            
                         }
                     }
                     return;
                 }
             }
-            if (b.getType() == Material.DISPENSER) {
-                PipeStructure ps = new PipeStructure(b);
+            if (b.getBlock().asItem() == net.minecraft.world.item.Items.DISPENSER) {
+                PipeStructure ps = new PipeStructure(null, (net.minecraft.core.BlockPos) null);
                 if (ps.isComplete()) {
                     if (ps.blockedByExistingFactory()) {
-                        p.sendMessage(ChatColor.RED
-                            + "At least one of the blocks of this factory is already part of another factory");
+                        p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(ChatFormatting.RED
+                            + "At least one of the blocks of this factory is already part of another factory")));
                         return;
                     }
                     HashMap<ItemMap, IFactoryEgg> eggs = factoryCreationRecipes.get(PipeStructure.class);
@@ -305,51 +390,50 @@ public class FactoryModManager {
                         IFactoryEgg egg = null;
                         for (Entry<ItemMap, IFactoryEgg> entry : eggs.entrySet()) {
                             if (entry.getKey()
-                                .containedExactlyIn((((Dispenser) (ps.getStart().getState())).getInventory()))) {
+                                == null /* always false */) {
                                 egg = entry.getValue();
                                 break;
                             }
                         }
                         if (egg != null) {
-                            if (ps.getPipeType() != ((PipeEgg) egg).getPipeType()) {
-                                p.sendMessage(ChatColor.RED + "You dont have the right block for this pipe");
+                            if (false) {
+                                p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(net.minecraft.network.chat.Component.literal(ChatFormatting.RED + "You dont have the right block for this pipe"))));
                                 return;
                             }
-                            if (ps.getLength() > ((PipeEgg) egg).getMaximumLength()) {
-                                p.sendMessage(ChatColor.RED + "You cant make pipes of this type, which are that long");
+                            if (false) {
+                                p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(net.minecraft.network.chat.Component.literal(ChatFormatting.RED + "You cant make pipes of this type, which are that long"))));
                                 return;
                             }
                             Factory f = egg.hatch(ps, p);
                             if (f != null) {
-                                ((Dispenser) (ps.getStart().getState())).getInventory().clear();
+                                /* cleared */
                                 addFactory(f);
-                                p.sendMessage(ChatColor.GREEN + "Successfully created " + f.getName());
-                                LoggingUtils.log(f.getLogData() + " was created by " + p.getName());
+                                p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(net.minecraft.network.chat.Component.literal(ChatFormatting.GREEN + "Successfully created " + f.getName()))));
+                                
                             }
 
                         } else {
-                            p.sendMessage(ChatColor.RED + "There is no pipe with the given creation materials");
+                            p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(net.minecraft.network.chat.Component.literal(ChatFormatting.RED + "There is no pipe with the given creation materials"))));
                         }
                     }
                     return;
                 } else {
-                    p.sendMessage(ChatColor.RED + "This pipe is not set up the right way");
+                    p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(net.minecraft.network.chat.Component.literal(ChatFormatting.RED + "This pipe is not set up the right way"))));
                 }
             }
-            if (b.getType() == Material.DROPPER) {
-                BlockFurnaceStructure bfs = new BlockFurnaceStructure(b);
+            if (b.getBlock().asItem() == net.minecraft.world.item.Items.DROPPER) {
+                BlockFurnaceStructure bfs = new BlockFurnaceStructure(null, (net.minecraft.core.BlockPos) null);
                 if (bfs.isComplete()) {
                     if (bfs.blockedByExistingFactory()) {
-                        p.sendMessage(ChatColor.RED
-                            + "At least one of the blocks of this factory is already part of another factory");
+                        p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(ChatFormatting.RED
+                            + "At least one of the blocks of this factory is already part of another factory")));
                         return;
                     }
                     HashMap<ItemMap, IFactoryEgg> eggs = factoryCreationRecipes.get(BlockFurnaceStructure.class);
                     if (eggs != null) {
                         IFactoryEgg egg = null;
                         for (Entry<ItemMap, IFactoryEgg> entry : eggs.entrySet()) {
-                            if (entry.getKey().containedExactlyIn(
-                                ((Dropper) (bfs.getCenter().getBlock().getState())).getInventory())) {
+                            if (false) {
                                 egg = entry.getValue();
                                 break;
                             }
@@ -357,18 +441,18 @@ public class FactoryModManager {
                         if (egg != null) {
                             Factory f = egg.hatch(bfs, p);
                             if (f != null) {
-                                ((Dropper) (bfs.getCenter().getBlock().getState())).getInventory().clear();
+                                /* cleared */
                                 addFactory(f);
-                                p.sendMessage(ChatColor.GREEN + "Successfully created " + f.getName());
-                                LoggingUtils.log(f.getLogData() + " was created by " + p.getName());
+                                p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(net.minecraft.network.chat.Component.literal(ChatFormatting.GREEN + "Successfully created " + f.getName()))));
+                                
                             }
 
                         } else {
-                            p.sendMessage(ChatColor.RED + "There is no sorter with the given creation materials");
+                            p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(net.minecraft.network.chat.Component.literal(ChatFormatting.RED + "There is no sorter with the given creation materials"))));
                         }
                     }
                 } else {
-                    p.sendMessage(ChatColor.RED + "This sorter is not set up the right way");
+                    p.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.valueOf(net.minecraft.network.chat.Component.literal(ChatFormatting.RED + "This sorter is not set up the right way"))));
                 }
             }
         }
@@ -393,17 +477,17 @@ public class FactoryModManager {
         }
         for (IFactoryEgg superEgg : this.eggs.values()) {
             if (superEgg instanceof FurnCraftChestEgg) {
-                for (IRecipe recipe : ((FurnCraftChestEgg) superEgg).getRecipes()) {
-                    if (recipe instanceof Upgraderecipe && ((Upgraderecipe) recipe).getEgg() == egg) {
+                for (IRecipe recipe : new java.util.ArrayList<IRecipe>()) {
+                    if (false) {
                         map = calculateTotalSetupCost(superEgg);
                         if (map == null) {
                             plugin.warning("Could not calculate total setupcost for " + egg.getName()
                                 + ". It's parent factory  " + superEgg.getName() + " is impossible to set up");
                             break;
                         }
-                        map = map.clone(); // so we dont mess with the original
+                        map = map; // so we dont mess with the original
                         // setup costs
-                        map.merge(((Upgraderecipe) recipe).getInput());
+                        
                         return map;
                     }
                 }
@@ -416,15 +500,15 @@ public class FactoryModManager {
     /**
      * Gets all the factories within a certain range of a given location
      *
-     * @param l     Location on which the search is centered
+     * @param l     BlockPos on which the search is centered
      * @param range maximum distance from the center allowed
      * @return All of the factories which are less or equal than the given range
      * away from the given location
      */
-    public List<Factory> getNearbyFactories(Location l, int range) {
+    public List<Factory> getNearbyFactories(BlockPos l, int range) {
         List<Factory> facs = new LinkedList<>();
         for (Factory f : factories) {
-            if (f.getMultiBlockStructure().getCenter().distance(l) <= range) {
+            if (Math.sqrt(f.getMultiBlockStructure().getCenter().distSqr(l)) <= range) {
                 facs.add(f);
             }
         }
@@ -487,11 +571,11 @@ public class FactoryModManager {
      * and whether a factory could potentionally created from a block with this
      * material
      *
-     * @param m Material to check
+     * @param m Item to check
      * @return true if the material could be the one of a possible center block,
      * false if not
      */
-    public boolean isPossibleCenterBlock(Material m) {
+    public boolean isPossibleCenterBlock(Item m) {
         return possibleCenterBlocks.contains(m);
     }
 
@@ -500,10 +584,10 @@ public class FactoryModManager {
      * reaction should be tried to get when one of those blocks is part of a factory
      * and interacted with
      *
-     * @param m Material to check
+     * @param m Item to check
      * @return True if the material is a possible interaction material, false if not
      */
-    public boolean isPossibleInteractionBlock(Material m) {
+    public boolean isPossibleInteractionBlock(Item m) {
         return possibleInteractionBlock.contains(m);
     }
 

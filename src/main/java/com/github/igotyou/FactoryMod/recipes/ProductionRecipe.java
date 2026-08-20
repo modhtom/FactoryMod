@@ -1,165 +1,87 @@
 package com.github.igotyou.FactoryMod.recipes;
 
-import com.github.igotyou.FactoryMod.factories.FurnCraftChestFactory;
-import com.github.igotyou.FactoryMod.recipes.scaling.ProductionRecipeModifier;
-import java.text.DecimalFormat;
+import com.github.igotyou.FactoryMod.factories.Factory;
+import com.github.igotyou.FactoryMod.utility.ItemMap;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
 
-import com.github.igotyou.FactoryMod.utility.MultiInventoryWrapper;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import vg.civcraft.mc.civmodcore.inventory.ClonedInventory;
-import vg.civcraft.mc.civmodcore.inventory.InventoryUtils;
-import vg.civcraft.mc.civmodcore.inventory.items.ItemMap;
-import vg.civcraft.mc.civmodcore.inventory.items.ItemUtils;
-
-/**
- * Consumes a set of materials from a container and outputs another set of
- * materials to the same container
- */
-public class ProductionRecipe extends InputRecipe {
-
+/** A deterministic input-to-output recipe defined in config.yml. */
+public final class ProductionRecipe extends InputRecipe {
     private final ItemMap output;
-    private final ItemStack recipeRepresentation;
-    private final ProductionRecipeModifier modifier;
-    private final Random rng;
-    private final DecimalFormat decimalFormatting;
 
-    public ProductionRecipe(
-        String identifier,
-        String name,
-        int productionTime,
-        ItemMap inputs,
-        ItemMap output,
-        ItemStack recipeRepresentation,
-        ProductionRecipeModifier modifier
-    ) {
-        super(identifier, name, productionTime, inputs);
+    public ProductionRecipe(String identifier, String name, int productionTime, ItemMap input, ItemMap output) {
+        super(identifier, name, productionTime, input);
         this.output = output;
-        this.modifier = modifier;
-        this.rng = new Random();
-        this.decimalFormatting = new DecimalFormat("#.#####");
-        this.recipeRepresentation = recipeRepresentation != null ? recipeRepresentation : new ItemStack(Material.STONE);
-    }
-
-    public ItemMap getOutput() {
-        return output;
-    }
-
-    public ItemMap getGuaranteedOutput(int rank, int runs) {
-        if (modifier == null) {
-            return output.clone();
-        }
-        ItemMap adjusted = new ItemMap();
-        double factor = modifier.getFactor(rank, runs);
-        for (Entry<ItemStack, Integer> entry : output.getAllItems().entrySet()) {
-            adjusted.addItemAmount(entry.getKey(), (int) (Math.floor(entry.getValue() * factor)));
-        }
-        return adjusted;
     }
 
     @Override
-    public List<ItemStack> getOutputRepresentation(Inventory i, FurnCraftChestFactory fccf) {
-        if (i == null || fccf == null) {
-            return output.getItemStackRepresentation();
+    public boolean applyEffect(Container inputInventory, Container outputInventory, Factory factory) {
+        if (!enoughMaterialAvailable(inputInventory) || !canFit(outputInventory)) {
+            return false;
         }
-        ItemMap currentOut = getGuaranteedOutput(fccf.getRecipeLevel(this), fccf.getRunCount(this));
-        List<ItemStack> stacks = currentOut.getItemStackRepresentation();
-        double factor = (modifier != null) ? (modifier.getFactor(fccf.getRecipeLevel(this), fccf.getRunCount(this))) : 1.0;
-        for (Entry<ItemStack, Integer> entry : output.getAllItems().entrySet()) {
-            double additionalChance = (((double) entry.getValue()) * factor) - currentOut.getAmount(entry.getKey());
-            if (Math.abs(additionalChance) > 0.00000001) {
-                ItemStack is = entry.getKey().clone();
-                ItemUtils.addLore(is, ChatColor.GOLD + decimalFormatting.format(additionalChance) + " chance for additional item");
-                stacks.add(is);
-            }
+        if (!input.removeSafelyFrom(inputInventory)) {
+            return false;
         }
-        int possibleRuns = input.getMultiplesContainedIn(i);
-        for (ItemStack is : stacks) {
-            ItemUtils.addLore(is, ChatColor.GREEN + "Enough materials for " + possibleRuns + " runs");
+        for (ItemStack stack : output.getItemStackRepresentation()) {
+            insert(outputInventory, stack.copy());
         }
-        return stacks;
-    }
-
-    @Override
-    public List<ItemStack> getInputRepresentation(Inventory i, FurnCraftChestFactory fccf) {
-        if (i == null) {
-            return input.getItemStackRepresentation();
-        }
-        return createLoredStacksForInfo(i);
-    }
-
-    @Override
-    public EffectFeasibility evaluateEffectFeasibility(Inventory inputInv, Inventory outputInv, FurnCraftChestFactory fccf) {
-        boolean isFeasible = InventoryUtils.safelyAddItemsToInventory(ClonedInventory.cloneInventory(outputInv), output.getItemStackRepresentation().toArray(new ItemStack[0]));
-        String reasonSnippet = isFeasible ? null : "it ran out of storage space";
-        return new EffectFeasibility(
-            isFeasible,
-            reasonSnippet
-        );
-    }
-
-    @Override
-    public boolean applyEffect(Inventory inputInv, Inventory outputInv, FurnCraftChestFactory fccf) {
-        MultiInventoryWrapper combo = new MultiInventoryWrapper(inputInv, outputInv);
-        logBeforeRecipeRun(combo, fccf);
-        ItemMap toRemove = input.clone();
-        ItemMap toAdd;
-        if (getModifier() == null) {
-            toAdd = output.clone();
-        } else {
-            toAdd = getGuaranteedOutput(fccf.getRecipeLevel(this), fccf.getRunCount(this));
-            double factor = modifier.getFactor(fccf.getRecipeLevel(this), fccf.getRunCount(this));
-            for (Entry<ItemStack, Integer> entry : output.getAllItems().entrySet()) {
-                double additionalChance = (((double) entry.getValue()) * factor) - toAdd.getAmount(entry.getKey());
-                if (rng.nextDouble() <= additionalChance) {
-                    toAdd.addItemAmount(entry.getKey(), 1);
-                }
-            }
-        }
-        if (toRemove.isContainedIn(inputInv)) {
-            ItemStack[] itemsToAdd = toAdd.getItemStackRepresentation().toArray(new ItemStack[0]);
-            if (!InventoryUtils.safelyAddItemsToInventory(ClonedInventory.cloneInventory(outputInv), itemsToAdd)) {
-                return false; // does not fit in chest
-            }
-            if (toRemove.removeSafelyFrom(inputInv)) {
-                for (ItemStack is : toAdd.getItemStackRepresentation()) {
-                    outputInv.addItem(is);
-                }
-            }
-        }
-        logAfterRecipeRun(combo, fccf);
+        outputInventory.setChanged();
         return true;
     }
 
-    @Override
-    public Material getRecipeRepresentationMaterial() {
-        return this.recipeRepresentation.getType();
+    private boolean canFit(Container inventory) {
+        List<ItemStack> simulation = new ArrayList<>();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            simulation.add(inventory.getItem(slot).copy());
+        }
+        for (ItemStack result : output.getItemStackRepresentation()) {
+            ItemStack remaining = result.copy();
+            for (ItemStack slot : simulation) {
+                if (ItemStack.isSameItemSameComponents(slot, remaining)) {
+                    int moved = Math.min(remaining.getCount(), slot.getMaxStackSize() - slot.getCount());
+                    slot.grow(moved);
+                    remaining.shrink(moved);
+                }
+            }
+            for (int slot = 0; slot < simulation.size() && !remaining.isEmpty(); slot++) {
+                if (simulation.get(slot).isEmpty()) {
+                    simulation.set(slot, remaining.copy());
+                    remaining.setCount(0);
+                }
+            }
+            if (!remaining.isEmpty()) return false;
+        }
+        return true;
     }
 
-    @Override
-    public ItemStack getRecipeRepresentationType() {
-        ItemStack itemStack = new ItemStack(this.recipeRepresentation);
-        itemStack.setAmount(1);
-        itemStack.lore(null);
-        return itemStack;
+    private static void insert(Container inventory, ItemStack stack) {
+        for (int slot = 0; slot < inventory.getContainerSize() && !stack.isEmpty(); slot++) {
+            ItemStack current = inventory.getItem(slot);
+            if (ItemStack.isSameItemSameComponents(current, stack)) {
+                int moved = Math.min(stack.getCount(), current.getMaxStackSize() - current.getCount());
+                current.grow(moved);
+                stack.shrink(moved);
+            }
+        }
+        for (int slot = 0; slot < inventory.getContainerSize() && !stack.isEmpty(); slot++) {
+            if (inventory.getItem(slot).isEmpty()) {
+                inventory.setItem(slot, stack.copy());
+                stack.setCount(0);
+            }
+        }
     }
 
-    public ProductionRecipeModifier getModifier() {
-        return modifier;
+    @Override public String getTypeIdentifier() { return "PRODUCTION"; }
+    @Override public List<ItemStack> getOutputRepresentation(Container inventory, Factory factory) {
+        return new ArrayList<>(output.getItemStackRepresentation());
     }
-
-    @Override
-    public String getTypeIdentifier() {
-        return "PRODUCTION";
+    @Override public List<String> getTextualOutputRepresentation(Container inventory, Factory factory) {
+        return List.of("Configured production output");
     }
-
-    @Override
-    public List<String> getTextualOutputRepresentation(Inventory i, FurnCraftChestFactory fccf) {
-        return formatLore(output);
+    @Override public ItemStack getRecipeRepresentation() {
+        return output.getItemStackRepresentation().stream().findFirst().orElse(ItemStack.EMPTY);
     }
 }

@@ -1,6 +1,6 @@
 package com.github.igotyou.FactoryMod.utility;
 
-import org.bukkit.inventory.Inventory;
+import net.minecraft.world.Container;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -8,12 +8,12 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface IIOFInventoryProvider {
 
-    Inventory getInputInventory();
+    Container getInputInventory();
 
-    Inventory getOutputInventory();
+    Container getOutputInventory();
 
     @Nullable
-    Inventory getFuelInventory();
+    Container getFuelInventory();
 
     int getInputCount();
 
