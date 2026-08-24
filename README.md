@@ -1,40 +1,41 @@
-# FactoryMod (Fabric Port)
+# FactoryMod v3.1.1 (Fabric Port)
 
-FactoryMod is a Minecraft Fabric mod (originally a Bukkit plugin) that introduces specialized, multi-block crafting machines which can consume and produce goods based on custom configurations.
+> This is a vibe coded project built with passion, and a love for MINECRAFT.
 
-This repository contains the **Fabric 1.21.11** port of the classic FactoryMod plugin.
+FactoryMod is a Minecraft Fabric mod (ported from the classic Bukkit/Civcraft plugin) that introduces specialized, multi-block crafting machines that consume and produce items based on highly customizable configurations.
 
-## Features
+## Requirements & Dependencies
 
-- **Custom Factories**: Create configurable factories using a Furnace, Crafting Table, and Chest.
-- **Tech Trees**: Create deep, complex tech trees that require significant investment and encourage cooperation.
-- **Improved Economy**: Offer better yields for vanilla items, or create items that are otherwise unobtainable in survival.
-- **Paginated GUI Menu**: Type `/fm` or hit a Crafting Table with a Stick to browse the available factories and their recipes in a user-friendly GUI.
-- **Configurable**: Easily configure factory setup costs, recipes, fuel consumption, production times, and more in `config/factorymod.yml`.
+- **Minecraft Version:** 26.2
+- **Fabric Loader:** >= 0.15.11
+- **Fabric API**
+- **Java:** 21 or newer
+
+## Features & Highlights
+
+- **Full Fabric 1.21.11 Port:** Completely independent of Spigot/Bukkit.
+- **Interactive Paginated GUI (`/fm`):**
+  - Type `/fm` or hit a Crafting Table with a Stick to browse configured factories.
+  - Displays full Setup Costs (materials required to construct the factory).
+  - Click on any factory to view all of its recipes with exact Inputs, Outputs, and Production Times.
+- **Pre-configured EdenMC Tech Tree:** Includes dozens of production recipes and machines ready out-of-the-box.
+- **Custom Economy Balancing:** Recipes updated with Netherite Ingot and Gold Block requirements.
+- **Autonomous Ticking:** Dedicated task scheduler and fuel consumption (Charcoal) system.
 
 ## Installation
 
-1. Drop the `.jar` file from the [Releases](#) tab into your server's `mods/` directory.
-2. Start the server.
-3. Open `config/factorymod.yml` to customize your factories and recipes. A default configuration (based on EdenMC) will be automatically generated.
+1. Place `FactoryMod-3.1.0.jar` into your server's `mods/` directory.
+2. Start the server once to generate `config/factorymod.yml`.
+3. *(Optional)* Customize recipes, setup costs, and production times in `config/factorymod.yml`.
 
-## Usage
+## In-Game Quick Start
 
-1. **Place the Blocks**: Place a Furnace, a Crafting Table, and a Chest next to each other.
-2. **Setup Cost**: Place the required setup cost materials into the Chest.
-3. **Create the Factory**: Hit the Crafting Table with a Stick.
-4. **Choose a Recipe**: Hit the Crafting Table with a Stick again to browse and select a recipe.
-5. **Run the Factory**: Place the required ingredients and fuel (e.g. Charcoal) into the chest/furnace, and hit the Furnace with a Stick to start production!
-
-## Compiling
-
-To build the project from source, clone this repository and run:
-
-```bash
-./gradlew build
-```
-
-The compiled JAR will be located in `build/libs/`.
+1. Place a Furnace, Crafting Table, and Chest directly adjacent to each other.
+2. Place the required setup cost materials inside the Chest.
+3. Left-click the Crafting Table with a Stick to create the factory.
+4. Left-click the Crafting Table with a Stick again to browse and select a recipe.
+5. Place Charcoal into the Furnace and recipe materials into the Chest.
+6. Left-click the Furnace with a Stick to activate the factory!
 
 ---
 *Based on the original FactoryMod plugin by the Civcraft/Civclassics community.*

@@ -79,8 +79,34 @@ public class InteractionListener {
             Factory factory = manager.getFactoryAt(pos);
             if (factory != null) {
                 manager.removeFactory(factory);
+                
+                // Return half the setup materials
+                com.github.igotyou.FactoryMod.utility.ItemMap setupCost = null;
+                for (FactoryModManager.FccDefinition def : manager.getFccDefinitions().values()) {
+                    if (def.name().equals(factory.getName())) {
+                        setupCost = def.setupCost();
+                        break;
+                    }
+                }
+
+                if (setupCost == null) {
+                    setupCost = manager.getTotalSetupCost(factory);
+                }
+                
+                if (setupCost != null) {
+                    for (ItemStack stack : setupCost.getItemStackRepresentation()) {
+                        int amount = stack.getCount() / 2;
+                        if (amount > 0) {
+                            ItemStack drop = stack.copy();
+                            drop.setCount(amount);
+                            net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
+                            level.addFreshEntity(itemEntity);
+                        }
+                    }
+                }
+
                 if (player instanceof ServerPlayer sp) {
-                    sp.sendSystemMessage(Component.literal("\u00a7c" + factory.getName() + " was dismantled."));
+                    sp.sendSystemMessage(Component.literal("\u00a7c" + factory.getName() + " was dismantled. You recovered half the materials."));
                 }
             }
         });
