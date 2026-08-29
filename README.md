@@ -1,4 +1,4 @@
-# FactoryMod v3.1.1 (Fabric Port)
+# FactoryMod v3.1.2 (Fabric Port)
 
 > This is a vibe coded project built with passion, and a love for MINECRAFT.
 
@@ -14,19 +14,24 @@ FactoryMod is a Minecraft Fabric mod (ported from the classic Bukkit/Civcraft pl
 ## Features & Highlights
 
 - **Full Fabric 1.21.11 Port:** Completely independent of Spigot/Bukkit.
-- **Interactive Paginated GUI (`/fm`):**
-  - Type `/fm` or hit a Crafting Table with a Stick to browse configured factories.
+- **Interactive Paginated GUI (/fm):**
+  - Type /fm or hit a Crafting Table with a Stick to browse configured factories.
   - Displays full Setup Costs (materials required to construct the factory).
   - Click on any factory to view all of its recipes with exact Inputs, Outputs, and Production Times.
+  - **[NEW]** Fully scrollable and paginated, allowing factories to support dozens of recipes without running out of screen space.
 - **Pre-configured EdenMC Tech Tree:** Includes dozens of production recipes and machines ready out-of-the-box.
+- **DataComponent / Enchantment Support [NEW]:** Factory outputs correctly preserve enchantments, custom lore, and names.
+- **RANDOM Recipe Type [NEW]:** Supports probability-based output crafting (e.g. 1 in 20 chance for a Silk Touch pickaxe).
+- **Double Chest Capacity [NEW]:** Factories natively interface with Double Chests, utilizing the full 54-slot capacity for massive bulk crafting.
+- **Precise Error Diagnostics [NEW]:** Factories broadcast status updates to nearby players, including exact reasons for stopping (e.g., *Insufficient input materials*, *Output inventory is full*, *Out of fuel*).
 - **Custom Economy Balancing:** Recipes updated with Netherite Ingot and Gold Block requirements.
 - **Autonomous Ticking:** Dedicated task scheduler and fuel consumption (Charcoal) system.
 
 ## Installation
 
-1. Place `FactoryMod-3.1.0.jar` into your server's `mods/` directory.
-2. Start the server once to generate `config/factorymod.yml`.
-3. *(Optional)* Customize recipes, setup costs, and production times in `config/factorymod.yml`.
+1. Place FactoryMod-3.1.2.jar into your server's mods/ directory.
+2. Start the server once to generate config/factorymod.yml.
+3. *(Optional)* Customize recipes, setup costs, and production times in config/factorymod.yml.
 
 ## In-Game Quick Start
 

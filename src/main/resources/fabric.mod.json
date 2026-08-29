@@ -5,13 +5,14 @@
   "name": "FactoryMod",
   "description": "A server-side mod allowing you to construct factories for crafting complex items.",
   "authors": [
-    "igotyou",
-    "Maxter",
-    "Gjum"
+    "modhtom (Fabric Port)",
+    "igotyou (Original)",
+    "Maxter (Original)",
+    "Gjum (Original)"
   ],
   "contact": {
-    "homepage": "https://github.com/igotyou/FactoryMod",
-    "sources": "https://github.com/igotyou/FactoryMod"
+    "homepage": "https://github.com/modhtom/FactoryMod",
+    "sources": "https://github.com/modhtom/FactoryMod"
   },
   "license": "CC0-1.0",
   "icon": "assets/factorymod/icon.png",

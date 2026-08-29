@@ -8952,13 +8952,19 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: IRON_INGOT
-        amount: 15
+        amount: 20
     output:
       iron_axe:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: IRON_AXE
         amount: 30
+        meta:
+          meta-type: UNSPECIFIC
+          ==: ItemMeta
+          enchants:
+            efficiency: 3
+            unbreaking: 3
   make_iron_sword:
     production_time: 4s
     name: Make Iron Sword
@@ -8975,16 +8981,62 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: IRON_SWORD
         amount: 15
+        meta:
+          meta-type: UNSPECIFIC
+          ==: ItemMeta
+          enchants:
+            sharpness: 3
+            unbreaking: 3
   make_iron_pick:
     production_time: 4s
     name: Make Iron Pick
-    type: PRODUCTION
+    type: RANDOM
     input:
       iron:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: IRON_INGOT
         amount: 15
+    outputs:
+      display:
+        display:
+          v: 3839
+          ==: org.bukkit.inventory.ItemStack
+          type: IRON_PICKAXE
+          amount: 15
+          meta:
+            meta-type: UNSPECIFIC
+            ==: ItemMeta
+            enchants:
+              efficiency: 3
+              unbreaking: 3
+      normal:
+        chance: 0.95
+        ironpicks:
+          v: 3839
+          ==: org.bukkit.inventory.ItemStack
+          type: IRON_PICKAXE
+          amount: 15
+          meta:
+            meta-type: UNSPECIFIC
+            ==: ItemMeta
+            enchants:
+              efficiency: 3
+              unbreaking: 3
+      silky:
+        chance: 0.05
+        ironpicks:
+          v: 3839
+          ==: org.bukkit.inventory.ItemStack
+          type: IRON_PICKAXE
+          amount: 15
+          meta:
+            meta-type: UNSPECIFIC
+            ==: ItemMeta
+            enchants:
+              efficiency: 3
+              unbreaking: 3
+              silk_touch: 1
     output:
       iron_pick:
         v: 3839
@@ -9024,6 +9076,12 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: IRON_SHOVEL
         amount: 15
+        meta:
+          meta-type: UNSPECIFIC
+          ==: ItemMeta
+          enchants:
+            efficiency: 3
+            unbreaking: 3
 
   repair_mithril_armor_factory:
     production_time: 4s
@@ -18252,3 +18310,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: BLACK_HARNESS
         amount: 1
+
+
+

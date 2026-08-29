@@ -20,7 +20,6 @@ import net.minecraft.network.chat.Component;
 
 public class InteractionListener {
     public static void register() {
-        // Right-click callback: only intercept when holding the factory interaction item (Stick)
         UseBlockCallback.EVENT.register((Player player, Level level, InteractionHand hand, BlockHitResult hitResult) -> {
             if (level.isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return InteractionResult.PASS;
             if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
@@ -29,7 +28,6 @@ public class InteractionListener {
             if (manager == null) return InteractionResult.PASS;
 
             ItemStack handItem = serverPlayer.getMainHandItem();
-            // If NOT holding a Stick, let vanilla open the chest / furnace / crafting table!
             if (handItem.getItem() != manager.getFactoryInteractionItem()) {
                 return InteractionResult.PASS;
             }
@@ -45,7 +43,6 @@ public class InteractionListener {
             return InteractionResult.PASS;
         });
 
-        // Left-click (punch) callback: only intercept when holding the factory interaction item (Stick)
         AttackBlockCallback.EVENT.register((Player player, Level level, InteractionHand hand, BlockPos pos, Direction direction) -> {
             if (level.isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return InteractionResult.PASS;
             
@@ -53,7 +50,6 @@ public class InteractionListener {
             if (manager == null) return InteractionResult.PASS;
 
             ItemStack handItem = serverPlayer.getMainHandItem();
-            // If NOT holding a Stick, let vanilla punch / mine the block!
             if (handItem.getItem() != manager.getFactoryInteractionItem()) {
                 return InteractionResult.PASS;
             }
@@ -71,7 +67,6 @@ public class InteractionListener {
             return InteractionResult.PASS;
         });
 
-        // Block break listener: dismantle factory if a part of it is broken
         PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
             if (level.isClientSide()) return;
             FactoryModManager manager = FactoryMod.getInstance().getManager();
@@ -80,7 +75,6 @@ public class InteractionListener {
             if (factory != null) {
                 manager.removeFactory(factory);
                 
-                // Return half the setup materials
                 com.github.igotyou.FactoryMod.utility.ItemMap setupCost = null;
                 for (FactoryModManager.FccDefinition def : manager.getFccDefinitions().values()) {
                     if (def.name().equals(factory.getName())) {

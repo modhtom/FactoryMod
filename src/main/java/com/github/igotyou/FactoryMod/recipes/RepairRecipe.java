@@ -65,7 +65,7 @@ public class RepairRecipe extends InputRecipe {
     }
 
     public EffectFeasibility evaluateEffectFeasibility(Container inputInv, Container outputInv, Factory fccf) {
-        return new EffectFeasibility(enoughMaterialAvailable(inputInv), "");
+        return new EffectFeasibility(enoughMaterialAvailable(inputInv), enoughMaterialAvailable(inputInv) ? null : "insufficient input materials");
     }
     
     public ItemStack getRecipeRepresentation() {
@@ -78,3 +78,4 @@ public class RepairRecipe extends InputRecipe {
         return res;
     }
 }
+

@@ -8,24 +8,49 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-/** A deterministic input-to-output recipe defined in config.yml. */
 public final class ProductionRecipe extends InputRecipe {
-    private final ItemMap output;
+    private final List<ItemStack> output;
 
-    public ProductionRecipe(String identifier, String name, int productionTime, ItemMap input, ItemMap output) {
+    public ProductionRecipe(String identifier, String name, int productionTime, ItemMap input, List<ItemStack> output) {
         super(identifier, name, productionTime, input);
         this.output = output;
     }
 
+    private List<ItemStack> getSplitOutputs() {
+        List<ItemStack> split = new ArrayList<>();
+        for (ItemStack stack : output) {
+            int amount = stack.getCount();
+            while (amount > 0) {
+                int count = Math.min(amount, stack.getMaxStackSize());
+                ItemStack copy = stack.copy();
+                copy.setCount(count);
+                split.add(copy);
+                amount -= count;
+            }
+        }
+        return split;
+    }
+
+    @Override
+    public EffectFeasibility evaluateEffectFeasibility(Container inputInv, Container outputInv, Factory fccf) {
+        if (!enoughMaterialAvailable(inputInv)) {
+            return new EffectFeasibility(false, "insufficient input materials");
+        }
+        if (!canFit(outputInv)) {
+            return new EffectFeasibility(false, "output inventory is full");
+        }
+        return new EffectFeasibility(true, null);
+    }
+
     @Override
     public boolean applyEffect(Container inputInventory, Container outputInventory, Factory factory) {
-        if (!enoughMaterialAvailable(inputInventory) || !canFit(outputInventory)) {
+        if (!evaluateEffectFeasibility(inputInventory, outputInventory, factory).isFeasible()) {
             return false;
         }
         if (!input.removeSafelyFrom(inputInventory)) {
             return false;
         }
-        for (ItemStack stack : output.getItemStackRepresentation()) {
+        for (ItemStack stack : getSplitOutputs()) {
             insert(outputInventory, stack.copy());
         }
         outputInventory.setChanged();
@@ -37,7 +62,7 @@ public final class ProductionRecipe extends InputRecipe {
         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
             simulation.add(inventory.getItem(slot).copy());
         }
-        for (ItemStack result : output.getItemStackRepresentation()) {
+        for (ItemStack result : getSplitOutputs()) {
             ItemStack remaining = result.copy();
             for (ItemStack slot : simulation) {
                 if (ItemStack.isSameItemSameComponents(slot, remaining)) {
@@ -76,12 +101,12 @@ public final class ProductionRecipe extends InputRecipe {
 
     @Override public String getTypeIdentifier() { return "PRODUCTION"; }
     @Override public List<ItemStack> getOutputRepresentation(Container inventory, Factory factory) {
-        return new ArrayList<>(output.getItemStackRepresentation());
+        return new ArrayList<>(output);
     }
     @Override public List<String> getTextualOutputRepresentation(Container inventory, Factory factory) {
         return List.of("Configured production output");
     }
     @Override public ItemStack getRecipeRepresentation() {
-        return output.getItemStackRepresentation().stream().findFirst().orElse(ItemStack.EMPTY);
+        return output.stream().findFirst().orElse(ItemStack.EMPTY);
     }
 }

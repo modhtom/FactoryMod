@@ -25,10 +25,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/** Loads FactoryMod's server configuration from Fabric's config directory. */
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.network.chat.Component;
+
 public final class ConfigParser {
     private final FactoryMod plugin;
-    public ConfigParser(FactoryMod plugin) { this.plugin = plugin; }
+    private final MinecraftServer server;
+
+    public ConfigParser(FactoryMod plugin, MinecraftServer server) {
+        this.plugin = plugin;
+        this.server = server;
+    }
 
     public FactoryModManager parse() {
         ConfigurationSection config = load();
@@ -71,8 +82,6 @@ public final class ConfigParser {
         Map<String, IRecipe> recipes = new HashMap<>();
         if (section == null) return recipes;
         
-        // UPGRADE recipes need the factory, which we link after parsing factories.
-        // For now, we will just parse them without the factory egg.
         
         for (String id : section.getKeys(false)) {
             ConfigurationSection recipe = section.getConfigurationSection(id);
@@ -82,7 +91,25 @@ public final class ConfigParser {
             int productionTime = ticks(recipe.getString("production_time", "1s"));
             IRecipe parsed = switch (type) {
                 case "PRODUCTION" -> new ProductionRecipe(id, name, productionTime,
-                    itemMap(recipe.getConfigurationSection("input")), itemMap(recipe.getConfigurationSection("output")));
+                    itemMap(recipe.getConfigurationSection("input")), parseItemStacks(recipe.getConfigurationSection("output")));
+                case "RANDOM" -> {
+                    List<ItemStack> display = new ArrayList<>();
+                    Map<List<ItemStack>, Double> outputs = new HashMap<>();
+                    ConfigurationSection outputsSec = recipe.getConfigurationSection("outputs");
+                    if (outputsSec != null) {
+                        for (String outKey : outputsSec.getKeys(false)) {
+                            ConfigurationSection entry = outputsSec.getConfigurationSection(outKey);
+                            if (entry == null) continue;
+                            if (outKey.equals("display")) {
+                                display = parseItemStacks(entry);
+                            } else {
+                                double chance = entry.getDouble("chance", 0.0);
+                                outputs.put(parseItemStacks(entry), chance);
+                            }
+                        }
+                    }
+                    yield new RandomItemRecipe(id, name, productionTime, itemMap(recipe.getConfigurationSection("input")), display, outputs);
+                }
                 case "COMPACT" -> new CompactingRecipe(id, itemMap(recipe.getConfigurationSection("input")),
                     recipe.getStringList("excluded_materials").stream().map(this::item).toList(), name, productionTime,
                     recipe.getString("compact_lore", "Compacted"));
@@ -126,7 +153,6 @@ public final class ConfigParser {
             int fuelIntervall = ticks(factory.getString("fuel_consumption_intervall", "10s"));
             ItemMap fuel = itemMap(factory.getConfigurationSection("fuel"));
             if (fuel.getItemStackRepresentation().isEmpty()) {
-                // Try default fuel
                 fuel = itemMap(section.getConfigurationSection("default_fuel"));
             }
             ItemMap setupCost = itemMap(factory.getConfigurationSection("setupcost"));
@@ -141,8 +167,12 @@ public final class ConfigParser {
     }
 
     private ItemMap itemMap(ConfigurationSection section) {
-        ItemMap map = new ItemMap();
-        if (section == null) return map;
+        return new ItemMap(parseItemStacks(section));
+    }
+
+    private List<ItemStack> parseItemStacks(ConfigurationSection section) {
+        List<ItemStack> list = new ArrayList<>();
+        if (section == null) return list;
         for (String id : section.getKeys(false)) {
             ConfigurationSection entry = section.getConfigurationSection(id);
             if (entry == null) continue;
@@ -164,11 +194,35 @@ public final class ConfigParser {
                     if (displayName != null) {
                         stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal(displayName));
                     }
+                    
+                    List<String> lore = meta.getStringList("lore");
+                    if (lore != null && !lore.isEmpty()) {
+                        List<Component> loreComponents = new ArrayList<>();
+                        for (String l : lore) {
+                            loreComponents.add(Component.literal(l));
+                        }
+                        stack.set(net.minecraft.core.component.DataComponents.LORE, new ItemLore(loreComponents));
+                    }
+                    
+                    ConfigurationSection enchants = meta.getConfigurationSection("enchants");
+                    if (enchants != null && server != null) {
+                        net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> enchantRegistry = 
+                            server.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+                            
+                        for (String enchantKey : enchants.getKeys(false)) {
+                            int level = enchants.getInt(enchantKey, 1);
+                            String eKey = enchantKey.contains(":") ? enchantKey.toLowerCase(Locale.ROOT) : "minecraft:" + enchantKey.toLowerCase(Locale.ROOT);
+                            net.minecraft.resources.Identifier resourceLoc = net.minecraft.resources.Identifier.parse(eKey);
+                            java.util.Optional<net.minecraft.core.Holder.Reference<net.minecraft.world.item.enchantment.Enchantment>> enchantHolder = 
+                                enchantRegistry.get(resourceLoc);
+                            enchantHolder.ifPresent(h -> stack.enchant(h, level));
+                        }
+                    }
                 }
-                map.addItemStack(stack);
+                list.add(stack);
             }
         }
-        return map;
+        return list;
     }
 
     private Item item(String id) {

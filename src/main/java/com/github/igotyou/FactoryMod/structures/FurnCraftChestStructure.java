@@ -27,7 +27,6 @@ public class FurnCraftChestStructure extends MultiBlockStructure {
             }
             
             for (BlockPos b : chestBlocks) {
-                // Find face from center to b
                 Direction chestFace = null;
                 for (Direction d : Direction.values()) {
                     if (center.relative(d).equals(b)) {

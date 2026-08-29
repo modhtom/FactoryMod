@@ -13,7 +13,6 @@ public class ProductionRecipeModifier {
     public double getFactor(int rank, int runAmount) {
         ProductionRecipeModifierConfig config = configs.get(rank);
         if (config == null) {
-            //no entry exists, so don't change
             return 1.0;
         }
         return config.getModifier(runAmount);
@@ -35,7 +34,6 @@ public class ProductionRecipeModifier {
     public double getMaximumMultiplierForRank(int rank) {
         ProductionRecipeModifierConfig config = configs.get(rank);
         if (config == null) {
-            //no entry exists, so don't change
             return 1.0;
         }
         return config.getMaximumIncrease();

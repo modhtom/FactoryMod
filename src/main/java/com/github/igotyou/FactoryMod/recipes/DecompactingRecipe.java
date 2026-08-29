@@ -44,11 +44,10 @@ public class DecompactingRecipe extends InputRecipe {
 
     @Override
     public EffectFeasibility evaluateEffectFeasibility(Container inputInv, Container outputInv, Factory fccf) {
-        boolean isFeasible = true;
-        return new EffectFeasibility(
-            isFeasible,
-            isFeasible ? null : "it ran out of storage space"
-        );
+        if (!enoughMaterialAvailable(inputInv)) {
+            return new EffectFeasibility(false, "insufficient input materials or no decompactable items");
+        }
+        return new EffectFeasibility(true, null);
     }
 
     @Override

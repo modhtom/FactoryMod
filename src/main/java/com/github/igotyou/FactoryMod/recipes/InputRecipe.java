@@ -25,7 +25,6 @@ public abstract class InputRecipe implements IRecipe {
     public int getProductionTime() { return productionTime; }
     public ItemMap getInput() { return input; }
 
-    // Check by scanning slots without mutating inventory
     public boolean enoughMaterialAvailable(Container inv) {
         ItemMap have = new ItemMap();
         for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -34,11 +33,9 @@ public abstract class InputRecipe implements IRecipe {
         return input.isContainedIn(have);
     }
 
-    // These must be declared here so subclasses that override them have the right signature.
     public abstract List<ItemStack> getOutputRepresentation(Container i, Factory fccf);
     public abstract List<String> getTextualOutputRepresentation(Container i, Factory fccf);
 
-    // Needed by IRecipe; concrete subclasses may override
     public List<ItemStack> getInputRepresentation(Container i, IRecipe r) { 
         return new ArrayList<>(input.getItemStackRepresentation());
     }

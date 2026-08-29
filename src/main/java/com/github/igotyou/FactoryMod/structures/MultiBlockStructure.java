@@ -47,7 +47,6 @@ public abstract class MultiBlockStructure {
     }
     
     public static boolean insecureRedstone(ServerLevel world, BlockPos here) { 
-        // We'll leave this false for now
         return false; 
     }
     

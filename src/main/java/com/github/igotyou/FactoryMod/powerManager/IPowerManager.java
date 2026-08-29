@@ -1,9 +1,5 @@
 package com.github.igotyou.FactoryMod.powerManager;
 
-/**
- * Manager to handle power availability and power consumption for a specific
- * factory
- */
 public interface IPowerManager {
 
     /**

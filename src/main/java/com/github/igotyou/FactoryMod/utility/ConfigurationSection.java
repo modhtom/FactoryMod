@@ -129,10 +129,8 @@ public class ConfigurationSection {
         return name;
     }
 
-    // Dummy methods for FileHandler compat although it was rewritten
     public ConfigurationSection createSection(String path) {
         Map<String, Object> newMap = new LinkedHashMap<>();
-        // this is basic, won't handle dots well for creation, but it's enough if not deeply nested
         data.put(path, newMap);
         return new ConfigurationSection(newMap, path, (this.path.isEmpty() ? "" : this.path + ".") + path);
     }

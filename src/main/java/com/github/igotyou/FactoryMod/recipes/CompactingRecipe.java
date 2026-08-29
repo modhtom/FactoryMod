@@ -54,17 +54,37 @@ public class CompactingRecipe extends InputRecipe {
     }
 
     @Override
+    public EffectFeasibility evaluateEffectFeasibility(Container inputInv, Container outputInv, Factory fccf) {
+        if (!input.isContainedIn(getMap(inputInv))) {
+            return new EffectFeasibility(false, "insufficient input materials");
+        }
+        ItemMap im = getMap(inputInv);
+        boolean foundCompactable = false;
+        for (int i = 0; i < inputInv.getContainerSize(); i++) {
+            ItemStack is = inputInv.getItem(i);
+            if (is != null && !is.isEmpty() && compactable(is, im)) {
+                foundCompactable = true;
+                break;
+            }
+        }
+        if (!foundCompactable) {
+            return new EffectFeasibility(false, "no compactable items found");
+        }
+        return new EffectFeasibility(true, null);
+    }
+
+    @Override
     public boolean applyEffect(Container inputInv, Container outputInv, Factory fccf) {
-        if (input.isContainedIn(getMap(inputInv))) {
-            ItemMap im = getMap(inputInv);
-            for (int i = 0; i < inputInv.getContainerSize(); i++) {
+        if (!evaluateEffectFeasibility(inputInv, outputInv, fccf).isFeasible()) {
+            return false;
+        }
+        ItemMap im = getMap(inputInv);
+        for (int i = 0; i < inputInv.getContainerSize(); i++) {
                 ItemStack is = inputInv.getItem(i);
                 if (is != null && !is.isEmpty()) {
                     if (compactable(is, im)) {
                         ItemStack compacted = is.copy();
                         compactStack(compacted);
-                        // We should test if it fits in outputInv
-                        // But simplified:
                         if (input.removeSafelyFrom(inputInv)) {
                             compact(is, inputInv, outputInv);
                         }
@@ -72,7 +92,6 @@ public class CompactingRecipe extends InputRecipe {
                     }
                 }
             }
-        }
         return false;
     }
     
@@ -153,7 +172,6 @@ public class CompactingRecipe extends InputRecipe {
                 }
             }
         }
-        // Simplified Shulker/bundle check, just assume max stack size check
         return im.getAmount(is.getItem()) >= getCompactStackSize(is);
     }
 
@@ -175,9 +193,7 @@ public class CompactingRecipe extends InputRecipe {
         return Arrays.asList("Input stack compacted into a single item");
     }
 
-    public EffectFeasibility evaluateEffectFeasibility(Container inputInv, Container outputInv, Factory fccf) {
-        return new EffectFeasibility(enoughMaterialAvailable(inputInv), "");
-    }
+
     
     public ItemStack getRecipeRepresentation() {
         return new ItemStack(Items.CHEST);

@@ -30,9 +30,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.server.level.ServerPlayer;
 import com.github.igotyou.FactoryMod.utility.ItemMap;
 
-/**
- * Manager class which handles all factories, their locations and their creation
- */
 public class FactoryModManager {
 
     private FactoryMod plugin;
@@ -185,51 +182,78 @@ public class FactoryModManager {
             return;
         }
 
-        net.minecraft.world.level.block.entity.BlockEntity chestBe = world.getBlockEntity(structure.getChest());
-        net.minecraft.world.Container chestInv = (chestBe instanceof net.minecraft.world.Container c) ? c : null;
+        eu.pb4.sgui.api.gui.SimpleGui gui = new eu.pb4.sgui.api.gui.SimpleGui(net.minecraft.world.inventory.MenuType.GENERIC_9x6, player, false);
+        gui.setTitle(net.minecraft.network.chat.Component.literal("\u00a78Available Factories"));
 
+        int index = 0;
         for (FccDefinition definition : fccDefinitions.values()) {
-            // First check if materials are in chest
-            if (chestInv != null) {
-                ItemMap chestMap = new ItemMap();
-                for (int slot = 0; slot < chestInv.getContainerSize(); slot++) {
-                    chestMap.addItemStack(chestInv.getItem(slot));
-                }
-                if (definition.setupCost().isContainedIn(chestMap)) {
-                    if (definition.setupCost().removeSafelyFrom(chestInv)) {
-                        FurnCraftChestFactory factory = new FurnCraftChestFactory(structure, definition.updateTime(), definition.name(), definition.recipes(), definition.fuel(), definition.fuelConsumptionInterval());
-                        addFactory(factory);
-                        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7aSuccessfully created " + definition.name() + "! (Materials used from chest)"));
-                        return;
-                    }
-                }
+            if (index >= 54) break;
+            
+            net.minecraft.world.item.ItemStack icon = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.CRAFTING_TABLE);
+            icon.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("\u00a7e" + definition.name()));
+            
+            java.util.List<net.minecraft.network.chat.Component> lore = new java.util.ArrayList<>();
+            lore.add(net.minecraft.network.chat.Component.literal("\u00a76Setup Cost:"));
+            for (net.minecraft.world.item.ItemStack is : definition.setupCost().getItemStackRepresentation()) {
+                lore.add(net.minecraft.network.chat.Component.literal(" \u00a77- \u00a7f" + is.getCount() + "x " + is.getHoverName().getString()));
             }
+            lore.add(net.minecraft.network.chat.Component.literal(""));
+            lore.add(net.minecraft.network.chat.Component.literal("\u00a7aClick to build this factory!"));
+            
+            icon.set(net.minecraft.core.component.DataComponents.LORE, new net.minecraft.world.item.component.ItemLore(lore));
 
-            // Next check if materials are in player inventory
-            ItemMap playerMap = new ItemMap();
-            for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
-                playerMap.addItemStack(player.getInventory().getItem(slot));
-            }
-            if (definition.setupCost().isContainedIn(playerMap)) {
-                if (definition.setupCost().removeSafelyFrom(player.getInventory())) {
-                    FurnCraftChestFactory factory = new FurnCraftChestFactory(structure, definition.updateTime(), definition.name(), definition.recipes(), definition.fuel(), definition.fuelConsumptionInterval());
-                    addFactory(factory);
-                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7aSuccessfully created " + definition.name() + "! (Materials used from inventory)"));
+            gui.setSlot(index, icon, (slot, clickType, action, openedGui) -> {
+                if (factoryExistsAt(center)) {
+                    openedGui.close();
                     return;
                 }
-            }
-        }
+                
+                net.minecraft.world.level.block.entity.BlockEntity chestBe = world.getBlockEntity(structure.getChest());
+                net.minecraft.world.Container chestInv = (chestBe instanceof net.minecraft.world.Container c) ? c : null;
+                
+                boolean created = false;
+                
+                // First check if materials are in chest
+                if (chestInv != null) {
+                    ItemMap chestMap = new ItemMap();
+                    for (int s = 0; s < chestInv.getContainerSize(); s++) {
+                        chestMap.addItemStack(chestInv.getItem(s));
+                    }
+                    if (definition.setupCost().isContainedIn(chestMap)) {
+                        if (definition.setupCost().removeSafelyFrom(chestInv)) {
+                            FurnCraftChestFactory factory = new FurnCraftChestFactory(structure, definition.updateTime(), definition.name(), definition.recipes(), definition.fuel(), definition.fuelConsumptionInterval());
+                            addFactory(factory);
+                            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7aSuccessfully created " + definition.name() + "! (Materials used from chest)"));
+                            created = true;
+                        }
+                    }
+                }
+                
+                // Next check if materials are in player inventory
+                if (!created) {
+                    ItemMap playerMap = new ItemMap();
+                    for (int s = 0; s < player.getInventory().getContainerSize(); s++) {
+                        playerMap.addItemStack(player.getInventory().getItem(s));
+                    }
+                    if (definition.setupCost().isContainedIn(playerMap)) {
+                        if (definition.setupCost().removeSafelyFrom(player.getInventory())) {
+                            FurnCraftChestFactory factory = new FurnCraftChestFactory(structure, definition.updateTime(), definition.name(), definition.recipes(), definition.fuel(), definition.fuelConsumptionInterval());
+                            addFactory(factory);
+                            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7aSuccessfully created " + definition.name() + "! (Materials used from inventory)"));
+                            created = true;
+                        }
+                    }
+                }
 
-        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7cYou do not have the setup materials to create this factory."));
-        for (FccDefinition def : fccDefinitions.values()) {
-            StringBuilder sb = new StringBuilder("\u00a7e• \u00a7a" + def.name() + " \u00a77requires: \u00a7f");
-            for (net.minecraft.world.item.ItemStack is : def.setupCost().getItemStackRepresentation()) {
-                sb.append(is.getCount()).append("x ").append(is.getHoverName().getString()).append(", ");
-            }
-            if (sb.length() > 2) sb.setLength(sb.length() - 2);
-            sb.append(" \u00a77(in chest or inventory)");
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(sb.toString()));
+                if (!created) {
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7cYou do not have the setup materials to create this factory."));
+                } else {
+                    openedGui.close();
+                }
+            });
+            index++;
         }
+        gui.open();
     }
 
     public void tickFactories() {

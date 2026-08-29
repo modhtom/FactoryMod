@@ -20,12 +20,10 @@ public class TaskScheduler {
     }
 
     private static void tick() {
-        // Add pending tasks
         while (!pendingAdd.isEmpty()) {
             tasks.add(pendingAdd.poll());
         }
         
-        // Remove pending cancelled tasks
         while (!pendingRemove.isEmpty()) {
             int toRemove = pendingRemove.poll();
             for (ScheduledTask task : tasks) {

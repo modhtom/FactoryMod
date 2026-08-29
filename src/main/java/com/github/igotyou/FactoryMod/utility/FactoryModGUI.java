@@ -24,9 +24,7 @@ public class FactoryModGUI {
         List<Factory> factories = manager.getAllFactories().stream().toList();
         for (int i = 0; i < factories.size(); i++) {
             Factory f = factories.get(i);
-            // Just basic listing
             gui.setSlot(i, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.CRAFTING_TABLE), (index, type, action, gui1) -> {
-                // Do something
             });
         }
         gui.open();
@@ -36,9 +34,6 @@ public class FactoryModGUI {
         SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x3, player, false);
         gui.setTitle(Component.literal(factory.getName()));
         
-        // This menu lets the player interact with the factory
-        // E.g. view recipes, activate/deactivate
-        // Just stub for now.
         gui.open();
     }
 }

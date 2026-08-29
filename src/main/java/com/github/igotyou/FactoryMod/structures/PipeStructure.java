@@ -14,7 +14,6 @@ public class PipeStructure extends MultiBlockStructure {
     public PipeStructure(ServerLevel world, BlockPos center) { 
         super(world);
         this.furnace = center;
-        // Stub logic for finding the pipe ends
         this.complete = false;
     } 
 

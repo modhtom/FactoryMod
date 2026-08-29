@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Handles left/right click interactions and opens the recipe selector GUI. */
 public final class FurnCraftChestInteractionManager implements IInteractionManager {
     private final FurnCraftChestFactory factory;
 
@@ -39,12 +38,24 @@ public final class FurnCraftChestInteractionManager implements IInteractionManag
 
     @Override
     public void rightClick(ServerPlayer player, BlockPos block, BlockState state, Direction face) {
-        SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x3, player, false);
-        gui.setTitle(Component.literal("\u00a78" + factory.getName() + " Recipes"));
+        openRecipeGui(player, 0);
+    }
+
+    private void openRecipeGui(ServerPlayer player, int page) {
+        SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x6, player, false);
+        gui.setTitle(Component.literal("\u00a78" + factory.getName() + " (Pg " + (page + 1) + ")"));
 
         List<IRecipe> recipes = factory.getRecipes();
-        for (int index = 0; index < recipes.size() && index < 27; index++) {
-            IRecipe recipe = recipes.get(index);
+        int recipesPerPage = 45;
+        int maxPages = (int) Math.ceil((double) recipes.size() / recipesPerPage);
+
+        int start = page * recipesPerPage;
+        int end = Math.min(start + recipesPerPage, recipes.size());
+
+        for (int i = start; i < end; i++) {
+            IRecipe recipe = recipes.get(i);
+            int slotIndex = i - start;
+
             ItemStack icon = (recipe instanceof InputRecipe input)
                 ? input.getRecipeRepresentation() : ItemStack.EMPTY;
             if (icon == null || icon.isEmpty()) {
@@ -80,12 +91,25 @@ public final class FurnCraftChestInteractionManager implements IInteractionManag
             }
             icon.set(DataComponents.LORE, new ItemLore(lore));
 
-            gui.setSlot(index, icon, (slot, clickType, action, openedGui) -> {
+            gui.setSlot(slotIndex, icon, (slot, clickType, action, openedGui) -> {
                 factory.setRecipe(recipe);
                 player.sendSystemMessage(Component.literal("\u00a7aSelected recipe: \u00a7e" + recipe.getName()));
                 openedGui.close();
             });
         }
+
+        if (page > 0) {
+            ItemStack prev = new ItemStack(Items.ARROW);
+            prev.set(DataComponents.CUSTOM_NAME, Component.literal("\u00a7aPrevious Page"));
+            gui.setSlot(45, prev, (slot, clickType, action, openedGui) -> openRecipeGui(player, page - 1));
+        }
+
+        if (page < maxPages - 1) {
+            ItemStack next = new ItemStack(Items.ARROW);
+            next.set(DataComponents.CUSTOM_NAME, Component.literal("\u00a7aNext Page"));
+            gui.setSlot(53, next, (slot, clickType, action, openedGui) -> openRecipeGui(player, page + 1));
+        }
+
         gui.open();
     }
 

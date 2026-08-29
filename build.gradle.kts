@@ -1,5 +1,4 @@
 plugins {
-    // Minecraft 26.1+ is unobfuscated and therefore uses Loom's non-remapping plugin.
     id("net.fabricmc.fabric-loom") version "1.17.19"
     id("maven-publish")
 }
@@ -20,13 +19,17 @@ repositories {
 }
 
 dependencies {
-    // To change the versions see the gradle.properties file
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     
     implementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
+    
     implementation("org.yaml:snakeyaml:2.2")
+    include("org.yaml:snakeyaml:2.2")
+    
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
+    
     implementation("eu.pb4:sgui:2.1.0+26.2")
+    include("eu.pb4:sgui:2.1.0+26.2")
 }
 
 tasks.withType<ProcessResources>().configureEach {

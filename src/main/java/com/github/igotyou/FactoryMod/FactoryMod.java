@@ -19,7 +19,7 @@ public class FactoryMod implements ModInitializer {
         com.github.igotyou.FactoryMod.commands.FactoryModCommand.register();
         
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            ConfigParser cp = new ConfigParser(this);
+            ConfigParser cp = new ConfigParser(this, server);
             manager = cp.parse();
             manager.loadFactories();
         });

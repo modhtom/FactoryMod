@@ -1,5 +1,6 @@
 # Gradle
 .gradle/
+.metals/
 build/
 run/
 !gradle/wrapper/gradle-wrapper.jar
