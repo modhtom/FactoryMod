@@ -11,14 +11,19 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.github.igotyou.FactoryMod.eggs.IFactoryEgg;
+
 public class Upgraderecipe extends InputRecipe {
 
-    // private FurnCraftChestEgg egg; // using Object to bypass if not migrated
-    private Object egg; // FIXME when FurnCraftChestEgg is ported
+    private IFactoryEgg egg;
 
     public Upgraderecipe(String identifier, String name, int productionTime, ItemMap input,
-                         Object egg) {
+                         IFactoryEgg egg) {
         super(identifier, name, productionTime, input);
+        this.egg = egg;
+    }
+
+    public void setEgg(IFactoryEgg egg) {
         this.egg = egg;
     }
 
@@ -30,6 +35,9 @@ public class Upgraderecipe extends InputRecipe {
         }
         if (input.isContainedIn(inMap)) {
             if (input.removeSafelyFrom(inputInv)) {
+                if (egg instanceof com.github.igotyou.FactoryMod.eggs.FurnCraftChestEgg fce && fccf instanceof com.github.igotyou.FactoryMod.factories.FurnCraftChestFactory fccFactory) {
+                    fccFactory.upgrade(fce.getName(), fce.getRecipes(), fce.getFuel(), fce.getFuelConsumptionIntervall(), fce.getUpdateTime());
+                }
             }
             return true;
         }
@@ -54,7 +62,7 @@ public class Upgraderecipe extends InputRecipe {
         return res;
     }
 
-    public Object getEgg() {
+    public IFactoryEgg getEgg() {
         return egg;
     }
 

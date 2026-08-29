@@ -38,6 +38,19 @@ public class FurnCraftChestFactory extends Factory {
     public IRecipe getCurrentRecipe() { return currentRecipe; }
     public void setRecipe(IRecipe recipe) { this.currentRecipe = recipe; }
 
+    public void upgrade(String name, List<IRecipe> recipes, ItemMap fuel, int fuelConsumptionIntervall, int updateTime) {
+        this.name = name;
+        this.recipes = recipes;
+        this.fuel = fuel;
+        this.fuelConsumptionIntervall = fuelConsumptionIntervall;
+        this.updateTime = updateTime;
+        if (!recipes.isEmpty()) {
+            this.currentRecipe = recipes.get(0);
+        } else {
+            this.currentRecipe = null;
+        }
+    }
+
     @Override
     public void attemptToActivate(ServerPlayer p, boolean onStartUp) {
         if (active) return;
@@ -187,7 +200,16 @@ public class FurnCraftChestFactory extends Factory {
                     deactivate("Output inventory is full");
                     return;
                 }
-                notifyPlayers("\u00a7aCompleted task: " + currentRecipe.getName());
+                
+                if (!(inputRecipe instanceof com.github.igotyou.FactoryMod.recipes.RepairRecipe)) {
+                    setHealth(getHealth() - 10);
+                    if (getHealth() <= 0) {
+                        deactivate("Factory broke down due to disrepair");
+                        return; // FactoryModManager will clean it up next tick
+                    }
+                }
+                
+                notifyPlayers("\u00a7aCompleted task: " + currentRecipe.getName() + " \u00a77(Health: " + getHealth() + "/" + getMaxHealth() + ")");
                 currentProductionTimer = 0;
             }
         }

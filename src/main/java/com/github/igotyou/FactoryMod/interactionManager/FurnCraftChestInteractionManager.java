@@ -34,6 +34,7 @@ public final class FurnCraftChestInteractionManager implements IInteractionManag
         } else {
             factory.attemptToActivate(player, false);
         }
+        player.sendSystemMessage(Component.literal("\u00a77Health: " + factory.getHealth() + "/" + factory.getMaxHealth()));
     }
 
     @Override

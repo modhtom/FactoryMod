@@ -1,6 +1,7 @@
 package com.github.igotyou.FactoryMod;
 
 import com.github.igotyou.FactoryMod.eggs.FurnCraftChestEgg;
+import com.github.igotyou.FactoryMod.eggs.IFactoryEgg;
 import com.github.igotyou.FactoryMod.recipes.CompactingRecipe;
 import com.github.igotyou.FactoryMod.recipes.DecompactingRecipe;
 import com.github.igotyou.FactoryMod.recipes.IRecipe;
@@ -44,11 +45,17 @@ public final class ConfigParser {
     public FactoryModManager parse() {
         ConfigurationSection config = load();
         Item interactionItem = item(config.getString("factory_interaction_material", "STICK"));
+        
+        int defaultHealth = config.getInt("default_health", 10000);
+        int decayAmount = config.getInt("decay_amount", 21);
+        int decayInterval = ticks(config.getString("decay_intervall", "1h"));
+        
         FactoryModManager manager = new FactoryModManager(plugin, interactionItem, false, false,
             config.getInt("redstone_power_on", 7), config.getInt("redstone_recipe_change", 2),
             config.getBoolean("log_inventories", false), config.getInt("max_input_chests", 10),
             config.getInt("max_output_chests", 10), config.getInt("max_fuel_chests", 10),
-            config.getInt("max_iof_chests", 15), Map.of(), false);
+            config.getInt("max_iof_chests", 15), Map.of(), false,
+            defaultHealth, decayAmount, decayInterval);
 
         Map<String, IRecipe> recipes = parseRecipes(config.getConfigurationSection("recipes"), manager);
         parseFactories(config.getConfigurationSection("factories"), recipes, manager);
@@ -77,6 +84,8 @@ public final class ConfigParser {
         }
         return new ConfigurationSection(new HashMap<>(), "", "");
     }
+
+    private Map<Upgraderecipe, String> upgradeTargetNames = new HashMap<>();
 
     private Map<String, IRecipe> parseRecipes(ConfigurationSection section, FactoryModManager manager) {
         Map<String, IRecipe> recipes = new HashMap<>();
@@ -117,8 +126,11 @@ public final class ConfigParser {
                     productionTime, recipe.getString("compact_lore", "Compacted"));
                 case "REPAIR" -> new RepairRecipe(id, name, productionTime,
                     itemMap(recipe.getConfigurationSection("input")), recipe.getInt("health_gained", 10000));
-                case "UPGRADE" -> new Upgraderecipe(id, name, productionTime,
-                    itemMap(recipe.getConfigurationSection("input")), null); // Egg will be resolved later if needed
+                case "UPGRADE" -> {
+                    Upgraderecipe u = new Upgraderecipe(id, name, productionTime, itemMap(recipe.getConfigurationSection("input")), null);
+                    upgradeTargetNames.put(u, recipe.getString("factory"));
+                    yield u;
+                }
                 default -> null;
             };
             if (parsed == null) {
@@ -163,6 +175,24 @@ public final class ConfigParser {
 
             manager.addFactoryEgg(com.github.igotyou.FactoryMod.structures.FurnCraftChestStructure.class, setupCost, egg);
             manager.registerFccDefinition(id, factoryName, updateTime, setupCost, assigned, fuel, fuelIntervall);
+        }
+        
+        for (IRecipe r : recipes.values()) {
+            if (r instanceof Upgraderecipe upgrade) {
+                String targetFactoryName = upgradeTargetNames.get(upgrade);
+                IFactoryEgg targetEgg = null;
+                for (IFactoryEgg egg : manager.getAllFactoryEggs()) {
+                    if (egg.getName().equals(targetFactoryName)) {
+                        targetEgg = egg;
+                        break;
+                    }
+                }
+                if (targetEgg != null) {
+                    upgrade.setEgg(targetEgg);
+                } else {
+                    plugin.warning("Could not find target factory '" + targetFactoryName + "' for upgrade recipe " + r.getIdentifier());
+                }
+            }
         }
     }
 
@@ -238,6 +268,8 @@ public final class ConfigParser {
             if (normalized.endsWith("ms")) return Math.max(1, Integer.parseInt(normalized.substring(0, normalized.length() - 2)) / 50);
             if (normalized.endsWith("s")) return Math.max(1, Integer.parseInt(normalized.substring(0, normalized.length() - 1)) * 20);
             if (normalized.endsWith("m")) return Math.max(1, Integer.parseInt(normalized.substring(0, normalized.length() - 1)) * 1200);
+            if (normalized.endsWith("h")) return Math.max(1, Integer.parseInt(normalized.substring(0, normalized.length() - 1)) * 72000);
+            if (normalized.endsWith("d")) return Math.max(1, Integer.parseInt(normalized.substring(0, normalized.length() - 1)) * 1728000);
             return Math.max(1, Integer.parseInt(normalized));
         } catch (NumberFormatException ignored) { return 20; }
     }

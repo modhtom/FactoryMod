@@ -60,10 +60,16 @@ public class FactoryModManager {
     /** Immutable config definition for the supported Furnace/Crafting-table/Chest factory. */
     public record FccDefinition(String name, int updateTime, ItemMap setupCost, List<IRecipe> recipes, ItemMap fuel, int fuelConsumptionInterval) { }
 
+    private int defaultHealth;
+    private int decayAmount;
+    private int decayInterval;
+    private long lastDecayCheck = System.currentTimeMillis();
+
     public FactoryModManager(FactoryMod plugin, Item factoryInteractionItem, boolean citadelEnabled,
                              boolean nameLayerEnabled, int redstonePowerOn, int redstoneRecipeChange, boolean logInventories,
                              int maxInputChests, int maxOutputChests, int maxFuelChests, int maxTotalIOFChests,
-                             Map<String, String> factoryRenames, boolean canUpgrade) {
+                             Map<String, String> factoryRenames, boolean canUpgrade,
+                             int defaultHealth, int decayAmount, int decayInterval) {
         this.plugin = plugin;
         this.factoryInteractionItem = factoryInteractionItem;
         this.citadelEnabled = citadelEnabled;
@@ -75,6 +81,9 @@ public class FactoryModManager {
         this.maxTotalIOFChests = maxTotalIOFChests;
         this.fileHandler = new FileHandler(this, factoryRenames);
         this.canUpgrade = canUpgrade;
+        this.defaultHealth = defaultHealth;
+        this.decayAmount = decayAmount;
+        this.decayInterval = decayInterval;
 
         factoryCreationRecipes = new HashMap<>();
         locations = new HashMap<>();
@@ -222,6 +231,8 @@ public class FactoryModManager {
                     if (definition.setupCost().isContainedIn(chestMap)) {
                         if (definition.setupCost().removeSafelyFrom(chestInv)) {
                             FurnCraftChestFactory factory = new FurnCraftChestFactory(structure, definition.updateTime(), definition.name(), definition.recipes(), definition.fuel(), definition.fuelConsumptionInterval());
+                            factory.setMaxHealth(defaultHealth);
+                            factory.setHealth(defaultHealth);
                             addFactory(factory);
                             player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7aSuccessfully created " + definition.name() + "! (Materials used from chest)"));
                             created = true;
@@ -238,6 +249,8 @@ public class FactoryModManager {
                     if (definition.setupCost().isContainedIn(playerMap)) {
                         if (definition.setupCost().removeSafelyFrom(player.getInventory())) {
                             FurnCraftChestFactory factory = new FurnCraftChestFactory(structure, definition.updateTime(), definition.name(), definition.recipes(), definition.fuel(), definition.fuelConsumptionInterval());
+                            factory.setMaxHealth(defaultHealth);
+                            factory.setHealth(defaultHealth);
                             addFactory(factory);
                             player.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a7aSuccessfully created " + definition.name() + "! (Materials used from inventory)"));
                             created = true;
@@ -257,8 +270,34 @@ public class FactoryModManager {
     }
 
     public void tickFactories() {
+        boolean doDecay = false;
+        long now = System.currentTimeMillis();
+        // decayInterval is in ticks (20 ticks = 1 second, so decayInterval * 50 = ms)
+        if (now - lastDecayCheck >= (decayInterval * 50L)) {
+            doDecay = true;
+            lastDecayCheck = now;
+        }
+        
+        List<Factory> toRemove = new java.util.ArrayList<>();
         for (Factory factory : getAllFactories()) {
-            if (factory instanceof FurnCraftChestFactory fcc) fcc.tick();
+            if (doDecay) {
+                factory.setHealth(factory.getHealth() - decayAmount);
+            }
+            if (factory.getHealth() <= 0) {
+                toRemove.add(factory);
+                continue; // Factory broken
+            }
+        }
+        
+        for (Factory factory : toRemove) {
+            if (factory.getMultiBlockStructure() != null && factory.getMultiBlockStructure().getWorld() != null) {
+                net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(factory.getMultiBlockStructure().getCenter()).inflate(15.0);
+                java.util.List<net.minecraft.server.level.ServerPlayer> players = factory.getMultiBlockStructure().getWorld().getEntitiesOfClass(net.minecraft.server.level.ServerPlayer.class, box, p -> true);
+                for (net.minecraft.server.level.ServerPlayer p : players) {
+                    p.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a74" + factory.getName() + " has completely broken down due to disrepair!"));
+                }
+            }
+            removeFactory(factory);
         }
     }
 

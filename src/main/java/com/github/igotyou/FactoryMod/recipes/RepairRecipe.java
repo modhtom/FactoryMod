@@ -65,7 +65,13 @@ public class RepairRecipe extends InputRecipe {
     }
 
     public EffectFeasibility evaluateEffectFeasibility(Container inputInv, Container outputInv, Factory fccf) {
-        return new EffectFeasibility(enoughMaterialAvailable(inputInv), enoughMaterialAvailable(inputInv) ? null : "insufficient input materials");
+        if (fccf.getHealth() >= fccf.getMaxHealth()) {
+            return new EffectFeasibility(false, "Factory is already fully repaired");
+        }
+        if (!enoughMaterialAvailable(inputInv)) {
+            return new EffectFeasibility(false, "insufficient input materials");
+        }
+        return new EffectFeasibility(true, null);
     }
     
     public ItemStack getRecipeRepresentation() {

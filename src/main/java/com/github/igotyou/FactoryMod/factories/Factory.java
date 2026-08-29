@@ -68,6 +68,7 @@ public abstract class Factory implements Runnable {
     public int getHealth() { return health; }
     public void setHealth(int h) { this.health = Math.min(h, maxHealth); }
     public int getMaxHealth() { return maxHealth; }
+    public void setMaxHealth(int maxHealth) { this.maxHealth = maxHealth; }
     
     public void repair(int amount) {
         this.health = Math.min(this.health + amount, maxHealth);

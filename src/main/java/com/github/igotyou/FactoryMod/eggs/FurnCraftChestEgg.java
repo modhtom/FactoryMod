@@ -29,6 +29,11 @@ public class FurnCraftChestEgg implements IFactoryEgg {
 
     @Override
     public String getName() { return name; }
+    
+    public List<IRecipe> getRecipes() { return recipes; }
+    public ItemMap getFuel() { return fuel; }
+    public int getFuelConsumptionIntervall() { return fuelConsumptionIntervall; }
+    public int getUpdateTime() { return updateTime; }
 
     @Override
     public Factory hatch(MultiBlockStructure m, ServerPlayer p) {

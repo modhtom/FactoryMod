@@ -24,6 +24,12 @@ public class FactoryMod implements ModInitializer {
             manager.loadFactories();
         });
         
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            if (manager != null) {
+                manager.tickFactories();
+            }
+        });
+        
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             onDisable();
         });
