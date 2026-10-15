@@ -4080,6 +4080,9 @@ recipes:
           display-name: Mithril Helmet
           lore:
             - A sturdy helmet made from mithril
+          enchants:
+            protection: 5
+            unbreaking: 5
 
   make_diamond_chest:
     production_time: 4s
@@ -4130,6 +4133,9 @@ recipes:
           display-name: Mithril Chestplate
           lore:
             - A sturdy chestplate made from mithril
+          enchants:
+            protection: 5
+            unbreaking: 5
 
   make_diamond_legs:
     production_time: 4s
@@ -4180,6 +4186,9 @@ recipes:
           display-name: Mithril Leggings
           lore:
             - Sturdy leggings made from mithril
+          enchants:
+            protection: 5
+            unbreaking: 5
   
   make_diamond_boots:
     production_time: 4s
@@ -4230,6 +4239,9 @@ recipes:
           display-name: Mithril Boots
           lore:
             - Sturdy boots made from mithril
+          enchants:
+            protection: 5
+            unbreaking: 5
 
   make_diamond_axe:
     production_time: 4s
@@ -4270,6 +4282,9 @@ recipes:
           display-name: Mithril Axe
           lore:
             - A sturdy axe made from mithril
+          enchants:
+            efficiency: 5
+            unbreaking: 5
 
   make_diamond_sword:
     production_time: 4s
@@ -4310,6 +4325,9 @@ recipes:
           display-name: Mithril Sword
           lore:
             - A sturdy sword made from mithril
+          enchants:
+            sharpness: 5
+            unbreaking: 5
 
   make_diamond_pick:
     production_time: 4s
@@ -4350,6 +4368,9 @@ recipes:
           display-name: Mithril Pick
           lore:
             - A sturdy pick made from mithril
+          enchants:
+            efficiency: 5
+            unbreaking: 5
 
   make_diamond_hoe:
     production_time: 4s
@@ -4390,6 +4411,9 @@ recipes:
           display-name: Mithril Hoe
           lore:
             - A sturdy hoe made from mithril
+          enchants:
+            efficiency: 5
+            unbreaking: 5
 
   make_diamond_shovel:
     production_time: 4s
@@ -4430,6 +4454,9 @@ recipes:
           display-name: Mithril Shovel
           lore:
             - A sturdy shovel made from mithril
+          enchants:
+            efficiency: 5
+            unbreaking: 5
 
   make_bastion:
     production_time: 4s

@@ -171,10 +171,11 @@ public final class ConfigParser {
             if (fuel.getItemStackRepresentation().isEmpty()) {
                 fuel.addItemStack(new ItemStack(Items.CHARCOAL, 1));
             }
+            boolean upgradeOnly = "FCCUPGRADE".equalsIgnoreCase(type);
             FurnCraftChestEgg egg = new FurnCraftChestEgg(factoryName, updateTime, assigned, fuel, fuelIntervall, 1.0);
 
-            manager.addFactoryEgg(com.github.igotyou.FactoryMod.structures.FurnCraftChestStructure.class, setupCost, egg);
-            manager.registerFccDefinition(id, factoryName, updateTime, setupCost, assigned, fuel, fuelIntervall);
+            manager.addFactoryEgg(com.github.igotyou.FactoryMod.structures.FurnCraftChestStructure.class, upgradeOnly ? null : setupCost, egg);
+            manager.registerFccDefinition(id, factoryName, updateTime, setupCost, assigned, fuel, fuelIntervall, upgradeOnly);
         }
         
         for (IRecipe r : recipes.values()) {
@@ -197,7 +198,25 @@ public final class ConfigParser {
     }
 
     private ItemMap itemMap(ConfigurationSection section) {
-        return new ItemMap(parseItemStacks(section));
+        ItemMap map = new ItemMap();
+        if (section == null) return map;
+        for (String id : section.getKeys(false)) {
+            ConfigurationSection entry = section.getConfigurationSection(id);
+            if (entry == null) continue;
+            
+            String materialName = entry.getString("type");
+            if (materialName == null || materialName.isEmpty()) {
+                materialName = entry.getString("material");
+            }
+            if (materialName == null) continue;
+            
+            Item parsed = item(materialName);
+            if (parsed != Items.AIR) {
+                int amount = Math.max(1, entry.getInt("amount", 1));
+                map.addItemAmount(parsed, amount);
+            }
+        }
+        return map;
     }
 
     private List<ItemStack> parseItemStacks(ConfigurationSection section) {

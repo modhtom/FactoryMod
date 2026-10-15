@@ -19,9 +19,17 @@ public class FactoryMod implements ModInitializer {
         com.github.igotyou.FactoryMod.commands.FactoryModCommand.register();
         
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            // Parse config first — factory definitions must exist before loading saved factories
             ConfigParser cp = new ConfigParser(this, server);
             manager = cp.parse();
-            manager.loadFactories();
+            manager.setServer(server);
+        });
+
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            // Load saved factories now that the world and all chunks are ready
+            if (manager != null) {
+                manager.loadFactories();
+            }
         });
         
         ServerTickEvents.END_SERVER_TICK.register(server -> {

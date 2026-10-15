@@ -58,12 +58,14 @@ public class FactoryModManager {
     private final Map<String, FccDefinition> fccDefinitions = new HashMap<>();
 
     /** Immutable config definition for the supported Furnace/Crafting-table/Chest factory. */
-    public record FccDefinition(String name, int updateTime, ItemMap setupCost, List<IRecipe> recipes, ItemMap fuel, int fuelConsumptionInterval) { }
+    public record FccDefinition(String name, int updateTime, ItemMap setupCost, List<IRecipe> recipes, ItemMap fuel, int fuelConsumptionInterval, boolean upgradeOnly) { }
 
     private int defaultHealth;
     private int decayAmount;
     private int decayInterval;
     private long lastDecayCheck = System.currentTimeMillis();
+    private net.minecraft.server.MinecraftServer minecraftServer;
+
 
     public FactoryModManager(FactoryMod plugin, Item factoryInteractionItem, boolean citadelEnabled,
                              boolean nameLayerEnabled, int redstonePowerOn, int redstoneRecipeChange, boolean logInventories,
@@ -164,12 +166,12 @@ public class FactoryModManager {
         }
     }
 
-    public void registerFccDefinition(String identifier, String name, int updateTime, ItemMap setupCost, List<IRecipe> recipes, ItemMap fuel, int fuelConsumptionInterval) {
+    public void registerFccDefinition(String identifier, String name, int updateTime, ItemMap setupCost, List<IRecipe> recipes, ItemMap fuel, int fuelConsumptionInterval, boolean upgradeOnly) {
         if (recipes.isEmpty()) {
             plugin.warning("Factory " + identifier + " has no valid recipes and was skipped");
             return;
         }
-        fccDefinitions.put(identifier, new FccDefinition(name, Math.max(1, updateTime), setupCost, List.copyOf(recipes), fuel, Math.max(1, fuelConsumptionInterval)));
+        fccDefinitions.put(identifier, new FccDefinition(name, Math.max(1, updateTime), setupCost, List.copyOf(recipes), fuel, Math.max(1, fuelConsumptionInterval), upgradeOnly));
     }
 
     public Map<String, IRecipe> getRecipes() { return recipes; }
@@ -197,12 +199,15 @@ public class FactoryModManager {
         int index = 0;
         for (FccDefinition definition : fccDefinitions.values()) {
             if (index >= 54) break;
+            // FCCUPGRADE factories can only be reached via an upgrade recipe, not direct construction
+            if (definition.upgradeOnly()) continue;
             
             net.minecraft.world.item.ItemStack icon = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.CRAFTING_TABLE);
             icon.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("\u00a7e" + definition.name()));
             
             java.util.List<net.minecraft.network.chat.Component> lore = new java.util.ArrayList<>();
             lore.add(net.minecraft.network.chat.Component.literal("\u00a76Setup Cost:"));
+            System.out.println("DEBUG: Factory " + definition.name() + " setup cost coal: " + definition.setupCost().getAmount(net.minecraft.world.item.Items.COAL) + ", diamond: " + definition.setupCost().getAmount(net.minecraft.world.item.Items.DIAMOND) + ", iron: " + definition.setupCost().getAmount(net.minecraft.world.item.Items.IRON_INGOT));
             for (net.minecraft.world.item.ItemStack is : definition.setupCost().getItemStackRepresentation()) {
                 lore.add(net.minecraft.network.chat.Component.literal(" \u00a77- \u00a7f" + is.getCount() + "x " + is.getHoverName().getString()));
             }
@@ -217,8 +222,16 @@ public class FactoryModManager {
                     return;
                 }
                 
-                net.minecraft.world.level.block.entity.BlockEntity chestBe = world.getBlockEntity(structure.getChest());
-                net.minecraft.world.Container chestInv = (chestBe instanceof net.minecraft.world.Container c) ? c : null;
+                net.minecraft.world.Container chestInv = null;
+                net.minecraft.world.level.block.state.BlockState chestState = world.getBlockState(structure.getChest());
+                if (chestState.getBlock() instanceof net.minecraft.world.level.block.ChestBlock chestBlock) {
+                    chestInv = net.minecraft.world.level.block.ChestBlock.getContainer(chestBlock, chestState, world, structure.getChest(), true);
+                } else {
+                    net.minecraft.world.level.block.entity.BlockEntity chestBe = world.getBlockEntity(structure.getChest());
+                    if (chestBe instanceof net.minecraft.world.Container c) {
+                        chestInv = c;
+                    }
+                }
                 
                 boolean created = false;
                 
@@ -609,18 +622,21 @@ public class FactoryModManager {
     }
 
     public void saveFactories() {
-        plugin.info("Attempting to save factory data");
-        fileHandler.save(getAllFactories());
+        plugin.info("Saving factory data...");
+        fileHandler.saveAll();
     }
 
     public void loadFactories() {
-        plugin.info("Attempting to load factory data");
-        fileHandler.load(eggs);
+        if (minecraftServer == null) {
+            plugin.warning("[FactoryMod] Cannot load factories — server reference is null.");
+            return;
+        }
+        plugin.info("Loading factory data...");
+        fileHandler.loadAll(minecraftServer);
     }
 
     /**
-     * Called when the plugin is deactivated to first save all factories and then
-     * deactivate them, so the deactivated block state is saved
+     * Called when the plugin is deactivated: saves all factories, then deactivates them.
      */
     public void shutDown() {
         saveFactories();
@@ -733,5 +749,12 @@ public class FactoryModManager {
 
     public FactoryModPlayerSettings getPlayerSettings() {
         return playerSettings;
+    }
+
+    /**
+     * Stores the MinecraftServer reference so persistence can access the world.
+     */
+    public void setServer(net.minecraft.server.MinecraftServer server) {
+        this.minecraftServer = server;
     }
 }

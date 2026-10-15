@@ -141,7 +141,7 @@ factories:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: STONE
-        amount: 512
+        amount: 256
     recipes:
       - smelt_stone
       - smelt_deepslate
@@ -201,28 +201,17 @@ factories:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: COAL
-        amount: 512
+        amount: 128
       iron:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: IRON_INGOT
-        amount: 256
+        amount: 128
       diamond:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 64
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 64
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
+        amount: 4
     recipes:
       - smelt_raw_copper
       - cast_silked_copper
@@ -254,6 +243,22 @@ factories:
     type: FCCUPGRADE
     name: Blast Furnace
     citadelBreakReduction: 2.0
+    setupcost:
+      coal:
+        v: 3839
+        ==: org.bukkit.inventory.ItemStack
+        type: COAL
+        amount: 64
+      iron:
+        v: 3839
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 64
+      diamond:
+        v: 3839
+        ==: org.bukkit.inventory.ItemStack
+        type: DIAMOND
+        amount: 1
     recipes:
       - adv_smelt_ancient_debris
       - adv_smelt_raw_copper
@@ -289,8 +294,8 @@ factories:
       charcoal:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: CHARCOAL
-        amount: 512
+        type: COAL
+        amount: 128
     recipes:
       - charcoal_from_oak_log
       - charcoal_from_spruce_log
@@ -323,6 +328,7 @@ factories:
         type: IRON_INGOT
         amount: 128
     recipes:
+      - compact_cobblestone_to_stone
       - crush_stone
       - crush_deepslate
       - crush_cobblestone
@@ -438,7 +444,7 @@ factories:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: TERRACOTTA
-        amount: 128
+        amount: 64
     recipes:
       - dye_clay_white
       - dye_clay_orange
@@ -518,7 +524,7 @@ factories:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: BRICKS
-        amount: 32
+        amount: 16
     recipes:
       - cook_beef
       - cook_pork
@@ -542,7 +548,7 @@ factories:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: BRICKS
-        amount: 64
+        amount: 32
     recipes:
       - bake_bread
       - bake_potatoes
@@ -562,35 +568,24 @@ factories:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
-        amount: 64
+        type: IRON_INGOT
+        amount: 16
         meta:
           meta-type: UNSPECIFIC
           ==: ItemMeta
           display-name: Steel Ingot
           lore:
             - A refined ingot of steel
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 16
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       lapis_block:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: LAPIS_BLOCK
-        amount: 24
+        amount: 12
       redstone_block:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: REDSTONE_BLOCK
-        amount: 24
+        amount: 12
     recipes:
       - make_steel_helm
       - make_steel_chest
@@ -611,7 +606,7 @@ factories:
       mithril_sheets:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 512
         meta:
           meta-type: UNSPECIFIC
@@ -619,17 +614,6 @@ factories:
           display-name: Mithril Sheet
           lore:
             - A sheet of refined mithril
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 256
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     recipes:
       - make_diamond_helm
       - make_diamond_chest
@@ -645,7 +629,7 @@ factories:
       mithril_sheets:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 384
         meta:
           meta-type: UNSPECIFIC
@@ -653,17 +637,6 @@ factories:
           display-name: Mithril Sheet
           lore:
             - A sheet of refined mithril
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 192
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     recipes:
       - make_diamond_pick
       - make_diamond_sword
@@ -963,7 +936,7 @@ factories:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: EMERALD
-        amount: 32
+        amount: 6
         meta:
           meta-type: UNSPECIFIC
           ==: ItemMeta
@@ -974,7 +947,7 @@ factories:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 32
+        amount: 8
         meta:
           meta-type: UNSPECIFIC
           ==: ItemMeta
@@ -992,17 +965,6 @@ factories:
           display-name: Bio-Component
           lore:
             - Bio-Component for bastion
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 128
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     recipes:
       - make_bastion
       - make_city_bastion
@@ -1043,17 +1005,6 @@ factories:
         ==: org.bukkit.inventory.ItemStack
         type: GLASS_BOTTLE
         amount: 512
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     recipes:
       - basic_xp_1
       - basic_xp_2
@@ -1178,17 +1129,6 @@ factories:
         ==: org.bukkit.inventory.ItemStack
         type: EMERALD
     setupcost:
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 48
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       paper:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -1315,6 +1255,7 @@ factories:
       - grow_big_dripleaf
       - grow_small_dripleaf
       - grow_lily_pad
+      - grow_lilies
       - grow_red_mushroom_block
       - grow_brown_mushroom_block
       - grow_mushroom_stem
@@ -1379,12 +1320,12 @@ factories:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: COPPER_BLOCK
-        amount: 256
+        amount: 128
       honeycomb:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: HONEYCOMB
-        amount: 32
+        amount: 16
     recipes:
       - wax_copper_block
       - wax_exposed_copper
@@ -1572,10 +1513,10 @@ recipes:
         type: WITHER_SKELETON_SKULL
         amount: 3
     output:
-      nether_star:
+      IRON_INGOT:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 1
   make_basic_cauldron_kit:
     production_time: 4s
@@ -1592,17 +1533,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: GOLD_BLOCK
         amount: 6
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 10
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       kit:
         v: 3839
@@ -1630,17 +1560,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: GOLD_BLOCK
         amount: 6
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 10
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     health_gained: 10000
   repair_basic_cauldron_kit:
     production_time: 4s
@@ -1669,17 +1588,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: EMERALD_BLOCK
         amount: 16
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       kit:
         v: 3839
@@ -1702,17 +1610,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: EMERALD_BLOCK
         amount: 16
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     health_gained: 10000
   repair_intermediate_cauldron_kit:
     production_time: 4s
@@ -1741,17 +1638,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: EMERALD_BLOCK
         amount: 32
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 64
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     factory: Intermediate Cauldron
   intermediate_xp_1:
     production_time: 4s
@@ -1828,17 +1714,6 @@ recipes:
           ==: ItemMeta
           lore:
             - Compacted Item
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       oak_sapling:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -1950,17 +1825,6 @@ recipes:
           ==: ItemMeta
           lore:
             - Compacted Item
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       jungle_sapling:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -2082,17 +1946,6 @@ recipes:
           ==: ItemMeta
           lore:
             - Compacted Item
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       coal:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -2229,17 +2082,6 @@ recipes:
           ==: ItemMeta
           lore:
             - Compacted Item
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       redstone:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -2376,17 +2218,6 @@ recipes:
           ==: ItemMeta
           lore:
             - Compacted Item
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       raw_copper:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -2523,17 +2354,6 @@ recipes:
           ==: ItemMeta
           lore:
             - Compacted Item
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       lapis_lazuli:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -2595,17 +2415,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: BEDROCK
         amount: 128
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 3000
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       wither_skull:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -2622,17 +2431,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: EMERALD_BLOCK
         amount: 16
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 16
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       kit:
         v: 3839
@@ -2655,17 +2453,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: EMERALD_BLOCK
         amount: 16
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 16
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     health_gained: 10000
   repair_advanced_cauldron_kit:
     production_time: 4s
@@ -2706,17 +2493,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: LAPIS_BLOCK
         amount: 256
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output_count: 128
     max_charge: 10
   refill_heliodor:
@@ -2729,17 +2505,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: EMERALD_BLOCK
         amount: 128
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     count: 128
     add_max_charge: 10
   finish_heliodor:
@@ -3019,7 +2784,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: COPPER_BLOCK
-        amount: 16
+        amount: 128
   adv_smelt_raw_copper:
     production_time: 4s
     name: Advanced Smelt Copper Ore
@@ -3077,13 +2842,13 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND_ORE
-        amount: 16
+        amount: 8
     output:
       diamond:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 48
+        amount: 28
   smelt_deepslate_diamond_ore:
     production_time: 4s
     name: Smelt Deepslate Diamond Ore
@@ -3099,7 +2864,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 48
+        amount: 28
   adv_smelt_diamond_ore:
     production_time: 4s
     name: Advanced Smelt Diamond Ore
@@ -3109,13 +2874,13 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND_ORE
-        amount: 16
+        amount: 8
     output:
       diamond:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 56
+        amount: 38
   adv_smelt_deepslate_diamond_ore:
     production_time: 4s
     name: Advanced Smelt Deepslate Diamond Ore
@@ -3131,7 +2896,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 56
+        amount: 38
   smelt_raw_gold:
     production_time: 4s
     name: Smelt Gold Ore
@@ -3333,7 +3098,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 64
+        amount: 8
       emerald_block:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -3344,17 +3109,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: ANCIENT_DEBRIS
         amount: 32
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 64
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     factory: Blast Furnace
 
   smelt_glass:
@@ -4046,21 +3800,10 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: LEATHER_HELMET
         amount: 8
-      player_essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 24
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 48
         meta:
           meta-type: UNSPECIFIC
@@ -4080,6 +3823,9 @@ recipes:
           display-name: Mithril Helmet
           lore:
             - A sturdy helmet made from mithril
+          enchants:
+            protection: 5
+            unbreaking: 5
 
   make_diamond_chest:
     production_time: 4s
@@ -4096,21 +3842,10 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: LEATHER_CHESTPLATE
         amount: 8
-      player_essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 24
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 48
         meta:
           meta-type: UNSPECIFIC
@@ -4130,6 +3865,9 @@ recipes:
           display-name: Mithril Chestplate
           lore:
             - A sturdy chestplate made from mithril
+          enchants:
+            protection: 5
+            unbreaking: 5
 
   make_diamond_legs:
     production_time: 4s
@@ -4146,21 +3884,10 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: LEATHER_LEGGINGS
         amount: 8
-      player_essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 24
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 48
         meta:
           meta-type: UNSPECIFIC
@@ -4180,6 +3907,9 @@ recipes:
           display-name: Mithril Leggings
           lore:
             - Sturdy leggings made from mithril
+          enchants:
+            protection: 5
+            unbreaking: 5
   
   make_diamond_boots:
     production_time: 4s
@@ -4196,21 +3926,10 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: LEATHER_BOOTS
         amount: 8
-      player_essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 24
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 48
         meta:
           meta-type: UNSPECIFIC
@@ -4230,6 +3949,9 @@ recipes:
           display-name: Mithril Boots
           lore:
             - Sturdy boots made from mithril
+          enchants:
+            protection: 5
+            unbreaking: 5
 
   make_diamond_axe:
     production_time: 4s
@@ -4239,7 +3961,7 @@ recipes:
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 16
         meta:
           meta-type: UNSPECIFIC
@@ -4247,29 +3969,21 @@ recipes:
           display-name: Mithril Sheet
           lore:
             - A sheet of refined mithril
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       mithril_axe:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND_AXE
-        amount: 16
+        amount: 8
         meta:
           meta-type: UNSPECIFIC
           ==: ItemMeta
           display-name: Mithril Axe
           lore:
             - A sturdy axe made from mithril
+          enchants:
+            efficiency: 5
+            unbreaking: 5
 
   make_diamond_sword:
     production_time: 4s
@@ -4279,7 +3993,7 @@ recipes:
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 16
         meta:
           meta-type: UNSPECIFIC
@@ -4287,29 +4001,21 @@ recipes:
           display-name: Mithril Sheet
           lore:
             - A sheet of refined mithril
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls 
     output:
       mithril_sword:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND_SWORD
-        amount: 16
+        amount: 8
         meta:
           meta-type: UNSPECIFIC
           ==: ItemMeta
           display-name: Mithril Sword
           lore:
             - A sturdy sword made from mithril
+          enchants:
+            sharpness: 5
+            unbreaking: 5
 
   make_diamond_pick:
     production_time: 4s
@@ -4319,7 +4025,7 @@ recipes:
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 16
         meta:
           meta-type: UNSPECIFIC
@@ -4327,29 +4033,21 @@ recipes:
           display-name: Mithril Sheet
           lore:
             - A sheet of refined mithril
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       mithril_pick:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND_PICKAXE
-        amount: 16
+        amount: 8
         meta:
           meta-type: UNSPECIFIC
           ==: ItemMeta
           display-name: Mithril Pick
           lore:
             - A sturdy pick made from mithril
+          enchants:
+            efficiency: 5
+            unbreaking: 5
 
   make_diamond_hoe:
     production_time: 4s
@@ -4359,7 +4057,7 @@ recipes:
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 16
         meta:
           meta-type: UNSPECIFIC
@@ -4367,29 +4065,21 @@ recipes:
           display-name: Mithril Sheet
           lore:
             - A sheet of refined mithril
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       mithril_hoe:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND_HOE
-        amount: 16
+        amount: 8
         meta:
           meta-type: UNSPECIFIC
           ==: ItemMeta
           display-name: Mithril Hoe
           lore:
             - A sturdy hoe made from mithril
+          enchants:
+            efficiency: 5
+            unbreaking: 5
 
   make_diamond_shovel:
     production_time: 4s
@@ -4399,7 +4089,7 @@ recipes:
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 16
         meta:
           meta-type: UNSPECIFIC
@@ -4407,29 +4097,21 @@ recipes:
           display-name: Mithril Sheet
           lore:
             - A sheet of refined mithril
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 32
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       mithril_shovel:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND_SHOVEL
-        amount: 16
+        amount: 8
         meta:
           meta-type: UNSPECIFIC
           ==: ItemMeta
           display-name: Mithril Shovel
           lore:
             - A sturdy shovel made from mithril
+          enchants:
+            efficiency: 5
+            unbreaking: 5
 
   make_bastion:
     production_time: 4s
@@ -4484,7 +4166,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 16
+        amount: 8
         meta:
           meta-type: UNSPECIFIC
           ==: ItemMeta
@@ -4502,17 +4184,6 @@ recipes:
           display-name: Bio-Component
           lore:
             - Bio-Component for bastion
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 64
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       bastion:
         v: 3839
@@ -4599,17 +4270,6 @@ recipes:
           display-name: Bio-Component
           lore:
             - Bio-Component for bastion
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 4
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       city_bastion:
         v: 3839
@@ -7046,17 +6706,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
         amount: 6
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 8
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       kit:
         v: 3839
@@ -7089,17 +6738,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
         amount: 6
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 8
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     health_gained: 10000
   repair_ore_smelter_kit:
     production_time: 4s
@@ -7138,17 +6776,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: ANCIENT_DEBRIS
         amount: 1
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 4
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       kit:
         v: 3839
@@ -7181,17 +6808,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: ANCIENT_DEBRIS
         amount: 1
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 4
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     health_gained: 10000
   repair_adv_ore_smelter_kit:
     production_time: 4s
@@ -8677,17 +8293,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: OBSIDIAN
         amount: 64
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 4
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       dried_ghast:
         v: 3839
@@ -9024,7 +8629,7 @@ recipes:
               efficiency: 3
               unbreaking: 3
       silky:
-        chance: 0.05
+        chance: 0.25
         ironpicks:
           v: 3839
           ==: org.bukkit.inventory.ItemStack
@@ -9091,7 +8696,7 @@ recipes:
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 1
         meta:
           meta-type: UNSPECIFIC
@@ -9099,17 +8704,6 @@ recipes:
           display-name: Mithril Sheet
           lore:
             - A sheet of refined mithril
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 8
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     health_gained: 10000
 
   repair_mithril_tool_factory:
@@ -9120,7 +8714,7 @@ recipes:
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 1
         meta:
           meta-type: UNSPECIFIC
@@ -9128,17 +8722,6 @@ recipes:
           display-name: Mithril Sheet
           lore:
             - A sheet of refined mithril
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 8
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     health_gained: 10000
   
   make_bastion_kit:
@@ -9212,17 +8795,6 @@ recipes:
           display-name: Bio-Component
           lore:
             - Bio-Component for bastion
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 16
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       kit:
         v: 3839
@@ -9306,17 +8878,6 @@ recipes:
           display-name: Bio-Component
           lore:
             - Bio-Component for bastion
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 16
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     health_gained: 10000
   repair_bastion_kit:
     production_time: 4s
@@ -10367,7 +9928,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       iron_block:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10404,7 +9965,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       allium:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10441,7 +10002,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       mossy_cobblestone:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10478,7 +10039,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       poisonous_potato:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10515,7 +10076,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       string:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10552,7 +10113,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       lead:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10589,7 +10150,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       lead:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10626,7 +10187,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       lead:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10663,7 +10224,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       lead:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10700,7 +10261,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       amethyst_shard:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10737,7 +10298,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       sculk:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10774,7 +10335,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       wet_sponge:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10811,7 +10372,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       blackstone:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10848,7 +10409,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       blaze_rod:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10885,7 +10446,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       cobweb:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10922,7 +10483,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       beetroot_seeds:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10959,7 +10520,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       honey_block:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -10996,7 +10557,7 @@ recipes:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
         type: DIAMOND
-        amount: 168
+        amount: 8
       slime_block:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -11336,17 +10897,6 @@ recipes:
     name: Make Research Station Repair Kit
     type: PRODUCTION
     input:
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 8
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       paper:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -11376,17 +10926,6 @@ recipes:
     production_time: 4s
     fuel_consumption_intervall: 4s
     input:
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 8
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       paper:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -12011,7 +11550,7 @@ recipes:
       fossil:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 1
         meta:
           meta-type: UNSPECIFIC
@@ -12024,7 +11563,7 @@ recipes:
         display:
           v: 3839
           ==: org.bukkit.inventory.ItemStack
-          type: PRISMARINE_SHARD
+          type: IRON_INGOT
           amount: 1
       # Trash
       cobblestone:
@@ -12980,6 +12519,43 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: LILY_PAD
         amount: 8
+        
+  grow_lilies:
+    production_time: 3s
+    fuel_consumption_intervall: 1s
+    name: Grow Lilies
+    type: PRODUCTION
+    input:
+      wheat_seeds:
+        v: 3839
+        ==: org.bukkit.inventory.ItemStack
+        type: wheat_seeds
+        amount: 3
+    output:
+      lily_of_the_valley:
+        v: 3839
+        ==: org.bukkit.inventory.ItemStack
+        type: lily_of_the_valley
+        amount: 5
+
+  grow_oxeye_daisy:
+    production_time: 3s
+    fuel_consumption_intervall: 1s
+    name: Grow Oxeye Daisy
+    type: PRODUCTION
+    input:
+      wheat_seeds:
+        v: 3839
+        ==: org.bukkit.inventory.ItemStack
+        type: wheat_seeds
+        amount: 3
+    output:
+      oxeye_daisy:
+        v: 3839
+        ==: org.bukkit.inventory.ItemStack
+        type: oxeye_daisy
+        amount: 6
+
   grow_red_mushroom_block:
     production_time: 4s
     fuel_consumption_intervall: 1s
@@ -15234,7 +14810,7 @@ recipes:
       mithril_sheet:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: PRISMARINE_SHARD
+        type: IRON_INGOT
         amount: 1
         meta:
           meta-type: UNSPECIFIC
@@ -15314,6 +14890,23 @@ recipes:
           display-name: Sulfur
           lore:
             - Refined sulfur from glowstone
+
+  compact_cobblestone_to_stone:
+    production_time: 2s
+    name: Compact Cobblestone to Stone
+    type: PRODUCTION
+    input:
+      cobblestone:
+        v: 3839
+        ==: org.bukkit.inventory.ItemStack
+        type: COBBLESTONE
+        amount: 32
+    output:
+      stone:
+        v: 3839
+        ==: org.bukkit.inventory.ItemStack
+        type: STONE
+        amount: 32
 
   crush_stone:
     production_time: 2s
@@ -15449,17 +15042,6 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: SEA_PICKLE
         amount: 32
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 1
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
     output:
       slime_ball:
         v: 3839
@@ -15518,7 +15100,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 1
         meta:
           meta-type: UNSPECIFIC
@@ -15545,7 +15127,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 48
         meta:
           meta-type: UNSPECIFIC
@@ -15587,7 +15169,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 48
         meta:
           meta-type: UNSPECIFIC
@@ -15629,7 +15211,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 48
         meta:
           meta-type: UNSPECIFIC
@@ -15671,7 +15253,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 48
         meta:
           meta-type: UNSPECIFIC
@@ -15704,7 +15286,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 1
         meta:
           meta-type: UNSPECIFIC
@@ -15771,7 +15353,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 16
         meta:
           meta-type: UNSPECIFIC
@@ -15803,7 +15385,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 16
         meta:
           meta-type: UNSPECIFIC
@@ -15835,7 +15417,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 16
         meta:
           meta-type: UNSPECIFIC
@@ -15867,7 +15449,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack    
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 16
         meta:
           meta-type: UNSPECIFIC
@@ -15899,7 +15481,7 @@ recipes:
       steel_ingot:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
-        type: NETHER_STAR
+        type: IRON_INGOT
         amount: 16
         meta:
           meta-type: UNSPECIFIC
@@ -15907,17 +15489,6 @@ recipes:
           display-name: Steel Ingot
           lore:
             - A refined ingot of steel
-      essence:
-        v: 3839
-        ==: org.bukkit.inventory.ItemStack
-        type: ENDER_EYE
-        amount: 8
-        meta:
-          meta-type: UNSPECIFIC
-          ==: ItemMeta
-          display-name: Player Essence
-          lore:
-            - Activity reward used to fuel pearls
       lapis_block:
         v: 3839
         ==: org.bukkit.inventory.ItemStack
@@ -18310,6 +17881,3 @@ recipes:
         ==: org.bukkit.inventory.ItemStack
         type: BLACK_HARNESS
         amount: 1
-
-
-
